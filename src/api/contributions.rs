@@ -12,10 +12,15 @@ fn parse_commit_from_string(
         let date = td.value().attr("data-date");
         let level = td.value().attr("data-level");
 
-        if let (Some(date), Some(level)) = (date, level) {
-            if let Ok(level) = level.parse::<u32>() {
-                commits_by_day.insert(date.to_string(), level);
+        match (date, level) {
+            (Some(date), Some(level)) => {
+                if let Ok(level) = level.parse::<u32>() {
+                    if level > 0 {
+                        commits_by_day.insert(date.to_string(), level);
+                    }
+                }
             }
+            _ => continue,
         }
     }
 
