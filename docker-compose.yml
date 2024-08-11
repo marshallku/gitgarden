@@ -1,0 +1,17 @@
+services:
+    app:
+        container_name: app
+        build: .
+        restart: unless-stopped
+        ports:
+            - ${PORT}:${PORT}
+        env_file:
+            - .env
+        environment:
+            HOST: "0.0.0.0"
+        networks:
+            - app_network
+
+networks:
+    app_network:
+        external: true
