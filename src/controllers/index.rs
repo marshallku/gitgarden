@@ -1,7 +1,7 @@
-use axum::{extract::Query, response::IntoResponse, Json};
+use axum::{extract::Query, response::IntoResponse};
 use serde::Deserialize;
 
-use crate::api::contributions::get_daily_commits;
+use crate::services::index::index_service;
 
 #[derive(Deserialize)]
 pub struct Options {
@@ -10,6 +10,5 @@ pub struct Options {
 }
 
 pub async fn get(Query(Options { user_name, year }): Query<Options>) -> impl IntoResponse {
-    let response = get_daily_commits(&user_name, year).await.unwrap();
-    Json(response)
+    index_service(user_name, year).await
 }
