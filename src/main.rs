@@ -1,13 +1,13 @@
 use axum::serve;
+use controllers::app::app;
 use env::state::AppState;
-use routes::app::app;
 use tokio::net::TcpListener;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer};
 use tracing::{info, Level};
 use utils::log::trace_layer_on_request;
 
+mod controllers;
 mod env;
-mod routes;
 mod utils;
 
 #[tokio::main]

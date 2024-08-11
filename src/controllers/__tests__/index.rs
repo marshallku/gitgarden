@@ -9,7 +9,7 @@ mod tests {
     };
     use tower::ServiceExt;
 
-    use crate::routes::index;
+    use crate::controllers::index;
 
     #[tokio::test]
     async fn should_response() {
