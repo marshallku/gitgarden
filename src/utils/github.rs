@@ -15,6 +15,8 @@ pub async fn github_graphql_request(
         reqwest::header::AUTHORIZATION,
         format!("token {}", token).parse().unwrap(),
     );
+    request_headers.insert(reqwest::header::ACCEPT, "*/*".parse().unwrap());
+    request_headers.insert(reqwest::header::USER_AGENT, "reqwest".parse().unwrap());
 
     for (key, value) in headers {
         request_headers.insert(
