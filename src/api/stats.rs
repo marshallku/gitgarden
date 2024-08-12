@@ -76,21 +76,22 @@ use crate::utils::github::github_graphql_request;
 
 pub async fn get_stats(user_name: String, token: String) -> Result<User, Vec<Error>> {
     let query = r#"
-    query userInfo($login: String!) {
+    query UserStats($login: String!) {
         user(login: $login) {
-            repositories(ownerAffiliations: OWNER, isFork: false, first: 100) {
-                nodes {
-                    name
-                    languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
-                        edges {
-                            size
-                            node {
-                                color
-                                name
-                            }
-                        }
-                    }
-                }
+            starredRepositories {
+                totalCount
+            }
+            contributionsCollection {
+                totalCommitContributions
+            }
+            pullRequests {
+                totalCount
+            }
+            issues {
+                totalCount
+            }
+            repositoriesContributedTo {
+                totalCount
             }
         }
     }"#;
