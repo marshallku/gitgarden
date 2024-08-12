@@ -1,51 +1,68 @@
-use chrono::{Datelike, NaiveDate, Weekday};
-
 use crate::api::contributions::get_daily_commits;
+use chrono::{Datelike, Duration, NaiveDate, Weekday};
+
+const CELL_SIZE: u32 = 10;
+const CELL_SPACING: u32 = 4;
+const GRID_LEFT_PADDING: u32 = 13;
+const GRID_TOP_PADDING: u32 = 13;
+const WEEK_TO_DAY: usize = 7;
 
 pub async fn index_service(user_name: String, year: i32) -> String {
-    let response = get_daily_commits(&user_name, year).await.unwrap();
+    let commits = get_daily_commits(&user_name, year).await.unwrap();
+    let (start_date, end_date) = get_year_range(year);
+    let weeks = calculate_weeks(start_date, end_date);
+
+    let cells = generate_contribution_cells(start_date, weeks, year);
+
+    generate_svg(cells)
+}
+
+fn get_year_range(year: i32) -> (NaiveDate, NaiveDate) {
     let first_day = NaiveDate::from_ymd_opt(year, 1, 1).unwrap();
     let last_day = NaiveDate::from_ymd_opt(year, 12, 31).unwrap();
-
-    // Find the first Sunday before or on January 1st
-    let start_date =
-        first_day - chrono::Duration::days(first_day.weekday().num_days_from_sunday() as i64);
-    // Find the last Saturday after or on December 31st
+    let start_date = first_day - Duration::days(first_day.weekday().num_days_from_sunday() as i64);
     let end_date =
-        last_day + chrono::Duration::days((6 - last_day.weekday().num_days_from_sunday()) as i64);
+        last_day + Duration::days((6 - last_day.weekday().num_days_from_sunday()) as i64);
+    (start_date, end_date)
+}
 
-    let weeks = ((end_date - start_date).num_days() / 7 + 1) as usize;
+fn calculate_weeks(start_date: NaiveDate, end_date: NaiveDate) -> usize {
+    ((end_date - start_date).num_days() / WEEK_TO_DAY as i64 + 1) as usize
+}
 
-    let mut current_date =
-        first_day - chrono::Duration::days(first_day.weekday().num_days_from_sunday() as i64);
+fn generate_contribution_cells(start_date: NaiveDate, weeks: usize, year: i32) -> String {
     let mut cells = String::new();
 
     for week in 0..weeks {
-        for day in 0..7 {
-            let x = week * 14 + 13;
-            let y = day * 13 + 13;
-
-            let color = if current_date.year() == year {
-                match current_date.weekday() {
-                    Weekday::Sat | Weekday::Sun => "#ebedf0",
-                    _ => "#9be9a8",
-                }
-            } else {
-                "#ffffff"
-            };
+        for day in 0..WEEK_TO_DAY {
+            let current_date = start_date + Duration::days((week * WEEK_TO_DAY + day) as i64);
+            let x = week as u32 * (CELL_SIZE + CELL_SPACING) + GRID_LEFT_PADDING;
+            let y = day as u32 * (CELL_SIZE + CELL_SPACING) + GRID_TOP_PADDING;
+            let color = get_cell_color(current_date, year);
 
             cells.push_str(&format!(
-                "  <rect width=\"10\" height=\"10\" x=\"{}\" y=\"{}\" fill=\"{}\" title=\"{}\" />\n",
-                x, y, color, current_date.format("%Y-%m-%d")
+                "  <rect width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" fill=\"{}\" title=\"{}\" />\n",
+                CELL_SIZE, CELL_SIZE, x, y, color, current_date.format("%Y-%m-%d")
             ));
-
-            if current_date <= last_day {
-                current_date = current_date.succ_opt().unwrap();
-            }
         }
     }
 
-    let svg = format!(
+    cells
+}
+
+fn get_cell_color(date: NaiveDate, year: i32) -> &'static str {
+    if date.year() == year {
+        match date.weekday() {
+            Weekday::Sat | Weekday::Sun => "#ebedf0",
+            _ => "#9be9a8",
+        }
+    } else {
+        "#ffffff" // Color for days outside the year
+    }
+}
+
+fn generate_svg(cells: String) -> String {
+    format!(
         r##"
         <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -57,9 +74,5 @@ pub async fn index_service(user_name: String, year: i32) -> String {
         </svg>
         "##,
         cells
-    );
-
-    println!("{:?}", response);
-
-    svg.to_string()
+    )
 }
