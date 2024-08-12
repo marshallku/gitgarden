@@ -9,12 +9,14 @@ mod tests {
     };
     use tower::ServiceExt;
 
-    use crate::controllers::index;
+    use crate::{controllers::index, env::state::AppState};
 
     #[tokio::test]
     async fn should_not_response_without_queries() {
-        let app: Router = Router::new().route("/", get(index::get));
+        let app: Router<AppState> = Router::new().route("/", get(index::get));
+        let state = AppState::from_env();
         let response = app
+            .with_state(state)
             .oneshot(Request::builder().uri("/").body(Body::empty()).unwrap())
             .await
             .unwrap();
@@ -24,8 +26,10 @@ mod tests {
 
     #[tokio::test]
     async fn should_response_with_queries() {
-        let app: Router = Router::new().route("/", get(index::get));
+        let app: Router<AppState> = Router::new().route("/", get(index::get));
+        let state = AppState::from_env();
         let response = app
+            .with_state(state)
             .oneshot(
                 Request::builder()
                     .uri("/?user_name=marshallku&year=2024")

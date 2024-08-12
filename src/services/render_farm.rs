@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
 use crate::{
-    api::contributions::get_daily_commits,
+    api::{contributions::get_daily_commits, stats::get_stats},
+    env::state::AppState,
     utils::{coordinate::generate_coordinate, date::get_year_range, encode::encode_from_path},
 };
 use chrono::{Datelike, Duration, NaiveDate};
@@ -12,12 +13,12 @@ const GRID_LEFT_PADDING: u32 = 24;
 const GRID_TOP_PADDING: u32 = 312;
 const WEEK_TO_DAY: usize = 7;
 
-pub async fn render_farm_service(user_name: String, year: i32) -> String {
+pub async fn render_farm_service(user_name: String, year: i32, state: AppState) -> String {
     let commits = get_daily_commits(&user_name, year).await.unwrap();
     let (start_date, end_date) = get_year_range(year).unwrap();
     let weeks = calculate_weeks(start_date, end_date);
 
-    generate_svg(user_name, year, start_date, weeks, commits)
+    generate_svg(user_name, year, state, start_date, weeks, commits).await
 }
 
 fn calculate_weeks(start_date: NaiveDate, end_date: NaiveDate) -> usize {
@@ -79,9 +80,10 @@ fn generate_home(user_name: String) -> String {
     )
 }
 
-fn generate_svg(
+async fn generate_svg(
     user_name: String,
     year: i32,
+    state: AppState,
     start_date: NaiveDate,
     weeks: usize,
     commits: HashMap<String, u32>,
