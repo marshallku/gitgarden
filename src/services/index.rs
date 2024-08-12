@@ -6,10 +6,10 @@ use crate::{
 };
 use chrono::{Datelike, Duration, NaiveDate};
 
-const CELL_SIZE: u32 = 10;
+const CELL_SIZE: u32 = 16;
 const CELL_SPACING: u32 = 4;
-const GRID_LEFT_PADDING: u32 = 13;
-const GRID_TOP_PADDING: u32 = 13;
+const GRID_LEFT_PADDING: u32 = 24;
+const GRID_TOP_PADDING: u32 = 312;
 const WEEK_TO_DAY: usize = 7;
 
 pub async fn index_service(user_name: String, year: i32) -> String {
@@ -42,8 +42,8 @@ fn generate_contribution_cells(
 
             let formatted_date = current_date.format("%Y-%m-%d").to_string();
 
-            let x = week as u32 * (CELL_SIZE + CELL_SPACING) + GRID_LEFT_PADDING;
-            let y = day as u32 * (CELL_SIZE + CELL_SPACING) + GRID_TOP_PADDING;
+            let x = GRID_LEFT_PADDING + week as u32 * (CELL_SIZE + CELL_SPACING);
+            let y = GRID_TOP_PADDING + day as u32 * (CELL_SIZE + CELL_SPACING);
 
             let commit_level = commits.get(&formatted_date).unwrap_or(&0);
 
@@ -74,7 +74,7 @@ fn generate_svg(
     weeks: usize,
     commits: HashMap<String, u32>,
 ) -> String {
-    const WIDTH: u32 = 930;
+    let width = weeks as u32 * (CELL_SIZE + CELL_SPACING) + GRID_LEFT_PADDING * 2;
     const HEIGHT: u32 = 465;
 
     let cells = generate_contribution_cells(year, start_date, weeks, commits);
@@ -86,10 +86,12 @@ fn generate_svg(
             xmlns:xlink="http://www.w3.org/1999/xlink"
             viewBox="0 0 {} {}"
             fill="none"
+            style="width: {}px; height: {}px;"
         >
-        {}
+            <rect width="100%" height="100%" fill="#a5c543" />
+            <g>{}</g>
         </svg>
         "##,
-        WIDTH, HEIGHT, cells
+        width, HEIGHT, width, HEIGHT, cells
     )
 }
