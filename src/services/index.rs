@@ -17,9 +17,7 @@ pub async fn index_service(user_name: String, year: i32) -> String {
     let (start_date, end_date) = get_year_range(year).unwrap();
     let weeks = calculate_weeks(start_date, end_date);
 
-    let cells = generate_contribution_cells(year, start_date, weeks, commits);
-
-    generate_svg(cells)
+    generate_svg(year, start_date, weeks, commits)
 }
 
 fn calculate_weeks(start_date: NaiveDate, end_date: NaiveDate) -> usize {
@@ -70,18 +68,28 @@ fn generate_contribution_cells(
     cells
 }
 
-fn generate_svg(cells: String) -> String {
+fn generate_svg(
+    year: i32,
+    start_date: NaiveDate,
+    weeks: usize,
+    commits: HashMap<String, u32>,
+) -> String {
+    const WIDTH: u32 = 930;
+    const HEIGHT: u32 = 465;
+
+    let cells = generate_contribution_cells(year, start_date, weeks, commits);
+
     format!(
         r##"
         <svg
             xmlns="http://www.w3.org/2000/svg"
             xmlns:xlink="http://www.w3.org/1999/xlink"
-            viewBox="0 0 930 465"
+            viewBox="0 0 {} {}"
             fill="none"
         >
         {}
         </svg>
         "##,
-        cells
+        WIDTH, HEIGHT, cells
     )
 }
