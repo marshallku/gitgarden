@@ -5,71 +5,71 @@ use serde_json::json;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ApiResponse {
-    data: Option<Data>,
-    errors: Option<Vec<Error>>,
+    pub data: Option<Data>,
+    pub errors: Option<Vec<Error>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Data {
-    user: Option<User>,
+    pub user: Option<User>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct User {
     #[serde(rename = "starredRepositories")]
-    starred_repositories: StarredRepositories,
+    pub starred_repositories: StarredRepositories,
     #[serde(rename = "contributionsCollection")]
-    contributions_collection: ContributionsCollection,
+    pub contributions_collection: ContributionsCollection,
     #[serde(rename = "pullRequests")]
-    pull_requests: PullRequests,
-    issues: Issues,
+    pub pull_requests: PullRequests,
+    pub issues: Issues,
     #[serde(rename = "repositoriesContributedTo")]
-    repositories_contributed_to: RepositoriesContributedTo,
+    pub repositories_contributed_to: RepositoriesContributedTo,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct StarredRepositories {
     #[serde(rename = "totalCount")]
-    total_count: i32,
+    pub total_count: i32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct ContributionsCollection {
     #[serde(rename = "totalCommitContributions")]
-    total_commit_contributions: i32,
+    pub total_commit_contributions: i32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct PullRequests {
     #[serde(rename = "totalCount")]
-    total_count: i32,
+    pub total_count: i32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Issues {
     #[serde(rename = "totalCount")]
-    total_count: i32,
+    pub total_count: i32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct RepositoriesContributedTo {
     #[serde(rename = "totalCount")]
-    total_count: i32,
+    pub total_count: i32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Error {
     #[serde(rename = "type")]
-    error_type: String,
-    path: Vec<String>,
-    locations: Vec<Location>,
-    message: String,
+    pub error_type: String,
+    pub path: Vec<String>,
+    pub locations: Vec<Location>,
+    pub message: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Location {
-    line: i32,
-    column: i32,
+    pub line: i32,
+    pub column: i32,
 }
 
 use crate::utils::github::github_graphql_request;
