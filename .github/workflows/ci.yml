@@ -19,6 +19,10 @@ jobs:
         steps:
             - uses: actions/checkout@v4
             - uses: actions-rust-lang/setup-rust-toolchain@v1
+            - name: Setup env
+              run: |
+                  cp .env.example .env
+                  sed -i 's/YOUR_GITHUB_TOKEN/${{ github.token }}/g' .env
             - run: cargo build
     test:
         name: Test project
@@ -26,6 +30,10 @@ jobs:
         steps:
             - uses: actions/checkout@v4
             - uses: actions-rust-lang/setup-rust-toolchain@v1
+            - name: Setup env
+              run: |
+                  cp .env.example .env
+                  sed -i 's/YOUR_GITHUB_TOKEN/${{ github.token }}/g' .env
             - run: cargo test
     send-notification:
         needs: [check-spelling, build, test]
