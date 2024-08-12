@@ -2,7 +2,7 @@ use axum::{extract::Query, http::HeaderMap, response::IntoResponse};
 use reqwest::StatusCode;
 use serde::Deserialize;
 
-use crate::services::index::index_service;
+use crate::services::render_farm::render_farm_service;
 
 #[derive(Deserialize)]
 pub struct Options {
@@ -18,7 +18,7 @@ pub async fn get(Query(Options { user_name, year }): Query<Options>) -> impl Int
     headers.insert("Pragma", "no-cache".parse().unwrap());
     headers.insert("Expires", "0".parse().unwrap());
 
-    let response = index_service(user_name, year).await;
+    let response = render_farm_service(user_name, year).await;
 
     (StatusCode::OK, headers, response)
 }
