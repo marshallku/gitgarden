@@ -2,7 +2,6 @@ use reqwest::{Client, Error};
 use serde_json::{json, Value};
 use std::collections::HashMap;
 
-#[allow(dead_code)]
 pub async fn github_graphql_request(
     query: &str,
     headers: &HashMap<&str, &str>,
