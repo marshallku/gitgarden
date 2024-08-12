@@ -5,12 +5,14 @@
         "autodocs",
         "BUILDKIT",
         "callout",
+        "chacha",
         "chrono",
         "codebases",
         "codepoint",
         "codepoints",
         "Datelike",
         "dotenv",
+        "Hasher",
         "hookform",
         "iname",
         "instanceof",
@@ -32,6 +34,7 @@
         "referer",
         "reqwest",
         "rfind",
+        "Seedable",
         "Segoe",
         "succ",
         "tempdir",
@@ -45,5 +48,10 @@
         "WEBP",
         "xlink"
     ],
-    "ignorePaths": ["Cargo.lock", "Cargo.toml", "target", "config/nginx.conf"]
+    "ignorePaths": [
+        "Cargo.lock",
+        "Cargo.toml",
+        "target",
+        "config/nginx.conf"
+    ]
 }

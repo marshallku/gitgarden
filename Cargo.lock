@@ -599,6 +599,8 @@ dependencies = [
  "env_logger",
  "http-body-util",
  "log",
+ "rand",
+ "rand_chacha",
  "reqwest",
  "scraper",
  "serde",
