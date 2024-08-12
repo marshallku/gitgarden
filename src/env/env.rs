@@ -19,7 +19,7 @@ impl Env {
         };
         let token = match std::env::var("GITHUB_TOKEN") {
             Ok(token) => Cow::Owned(token),
-            Err(_) => panic!("GITHUB_TOKEN is not set"),
+            Err(_) => Cow::Borrowed(""),
         };
 
         Self { port, host, token }
