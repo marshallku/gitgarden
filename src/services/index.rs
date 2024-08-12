@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 
-use crate::{api::contributions::get_daily_commits, utils::date::get_year_range};
+use crate::{
+    api::contributions::get_daily_commits,
+    utils::{date::get_year_range, encode::encode_from_path},
+};
 use chrono::{Datelike, Duration, NaiveDate};
 
 const CELL_SIZE: u32 = 10;
@@ -45,26 +48,26 @@ fn generate_contribution_cells(
             let y = day as u32 * (CELL_SIZE + CELL_SPACING) + GRID_TOP_PADDING;
 
             let commit_level = commits.get(&formatted_date).unwrap_or(&0);
-            let color = get_cell_color(commit_level);
+
+            let field = encode_from_path("field/dirt2.png");
 
             cells.push_str(&format!(
-                "  <rect width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" fill=\"{}\" title=\"{}\" data-level=\"{}\" />\n",
-                CELL_SIZE, CELL_SIZE, x, y, color, formatted_date, commit_level
+                "<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" xlink:href=\"data:image/png;base64,{}\" />",
+                CELL_SIZE, CELL_SIZE, x, y, field
             ));
+
+            if *commit_level > 0 {
+                let flower = encode_from_path(&format!("flowers/1-{}.png", commit_level));
+
+                cells.push_str(&format!(
+                    "<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" xlink:href=\"data:image/png;base64,{}\" />",
+                    CELL_SIZE, CELL_SIZE, x, y, flower
+                ));
+            }
         }
     }
 
     cells
-}
-
-fn get_cell_color(commit_level: &u32) -> &'static str {
-    match commit_level {
-        1 => "#c6e48b",
-        2 => "#7bc96f",
-        3 => "#239a3b",
-        4 => "#196127",
-        _ => "#ebedf0",
-    }
 }
 
 fn generate_svg(cells: String) -> String {
