@@ -80,6 +80,32 @@ fn generate_home(user_name: String) -> String {
     )
 }
 
+fn generate_trees(user_name: String, width: u32, repositories_contributed_to: i32) -> String {
+    let mut trees = String::new();
+    let tree_count = repositories_contributed_to;
+
+    for i in 0..tree_count {
+        let (x, y) = generate_coordinate(
+            format!("{}-tree-{}", user_name, i),
+            (5 as f64, (width - 50) as f64),
+            (5 as f64, 230 as f64),
+        );
+        let (tree, _) = generate_coordinate(
+            "{}-tree-kind-{}",
+            (1 as f64, 2 as f64),
+            (1 as f64, 2 as f64),
+        );
+        let tree = encode_from_path(format!("objects/tree{}.png", tree.round() as i32).as_str());
+
+        trees.push_str(&format!(
+            "<image width=\"35\" height=\"60\" x=\"{}\" y=\"{}\" xlink:href=\"data:image/png;base64,{}\" />",
+            x, y, tree
+        ));
+    }
+
+    trees
+}
+
 async fn generate_svg(
     user_name: String,
     year: i32,
@@ -91,8 +117,23 @@ async fn generate_svg(
     let width = weeks as u32 * (CELL_SIZE + CELL_SPACING) + GRID_LEFT_PADDING * 2;
     const HEIGHT: u32 = 465;
 
+    let stats = get_stats(user_name.clone(), state.token.clone()).await;
+
+    if stats.is_err() {
+        return String::new();
+    }
+
+    let stats = stats.unwrap();
+
+    println!("{:?}", stats);
+
     let cells = generate_contribution_cells(year, start_date, weeks, commits);
-    let home = generate_home(user_name);
+    let home = generate_home(user_name.clone());
+    let trees = generate_trees(
+        user_name,
+        width.clone(),
+        stats.clone().repositories_contributed_to.total_count,
+    );
 
     format!(
         r##"
@@ -106,8 +147,9 @@ async fn generate_svg(
             <rect width="100%" height="100%" fill="#a5c543" />
             <g>{}</g>
             <g>{}</g>
+            <g>{}</g>
         </svg>
         "##,
-        width, HEIGHT, width, HEIGHT, home, cells
+        width, HEIGHT, width, HEIGHT, trees, home, cells
     )
 }
