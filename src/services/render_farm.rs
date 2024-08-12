@@ -70,31 +70,33 @@ fn generate_contribution_cells(
 }
 
 fn generate_home(user_name: String) -> String {
-    let (x, y) = generate_coordinate(user_name, (80 as f64, 730 as f64), (25 as f64, 70 as f64));
+    let (x, y) = generate_coordinate(user_name, (80.0, 730.0), (25.0, 70.0));
     let home = encode_from_path("objects/home.png");
     let road = encode_from_path("objects/stone_road.png");
 
     format!(
         "<image width=\"151\" height=\"155\" x=\"{}\" y=\"{}\" xlink:href=\"data:image/png;base64,{}\" /><image width=\"31\" height=\"89\" x=\"{}\" y=\"{}\" xlink:href=\"data:image/png;base64,{}\" />",
-        x, y, home, x + 69 as f64, y + 152 as f64, road
+        x, y, home, x + 67.0, y + 152.0, road
     )
 }
 
 fn generate_trees(user_name: String, width: u32, repositories_contributed_to: i32) -> String {
     let mut trees = String::new();
     let tree_count = repositories_contributed_to;
+    let mut coords: Vec<(f64, f64)> = (0..tree_count)
+        .map(|i| {
+            generate_coordinate(
+                &format!("{}-tree-{}", user_name, i),
+                (5.0, width as f64 - 50.0),
+                (5.0, 230.0),
+            )
+        })
+        .collect();
 
-    for i in 0..tree_count {
-        let (x, y) = generate_coordinate(
-            format!("{}-tree-{}", user_name, i),
-            (5 as f64, (width - 50) as f64),
-            (5 as f64, 230 as f64),
-        );
-        let (tree, _) = generate_coordinate(
-            "{}-tree-kind-{}",
-            (1 as f64, 2 as f64),
-            (1 as f64, 2 as f64),
-        );
+    coords.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
+
+    for (x, y) in coords {
+        let (tree, _) = generate_coordinate("{}-tree-kind-{}", (1.0, 2.0), (1.0, 2.0));
         let tree = encode_from_path(format!("objects/tree{}.png", tree.round() as i32).as_str());
 
         trees.push_str(&format!(
