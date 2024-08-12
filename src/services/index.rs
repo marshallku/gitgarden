@@ -11,7 +11,7 @@ const WEEK_TO_DAY: usize = 7;
 
 pub async fn index_service(user_name: String, year: i32) -> String {
     let commits = get_daily_commits(&user_name, year).await.unwrap();
-    let (start_date, end_date) = get_year_range(year);
+    let (start_date, end_date) = get_year_range(year).unwrap();
     let weeks = calculate_weeks(start_date, end_date);
 
     let cells = generate_contribution_cells(year, start_date, weeks, commits);
