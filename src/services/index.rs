@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::{
     api::contributions::get_daily_commits,
-    utils::{date::get_year_range, encode::encode_from_path},
+    utils::{coordinate::generate_coordinate, date::get_year_range, encode::encode_from_path},
 };
 use chrono::{Datelike, Duration, NaiveDate};
 
@@ -17,7 +17,7 @@ pub async fn index_service(user_name: String, year: i32) -> String {
     let (start_date, end_date) = get_year_range(year).unwrap();
     let weeks = calculate_weeks(start_date, end_date);
 
-    generate_svg(year, start_date, weeks, commits)
+    generate_svg(user_name, year, start_date, weeks, commits)
 }
 
 fn calculate_weeks(start_date: NaiveDate, end_date: NaiveDate) -> usize {
@@ -68,7 +68,19 @@ fn generate_contribution_cells(
     cells
 }
 
+fn generate_home(user_name: String) -> String {
+    let (x, y) = generate_coordinate(user_name, (80 as f64, 730 as f64), (25 as f64, 70 as f64));
+    let home = encode_from_path("objects/home.png");
+    let road = encode_from_path("objects/stone_road.png");
+
+    format!(
+        "<image width=\"151\" height=\"155\" x=\"{}\" y=\"{}\" xlink:href=\"data:image/png;base64,{}\" /><image width=\"31\" height=\"89\" x=\"{}\" y=\"{}\" xlink:href=\"data:image/png;base64,{}\" />",
+        x, y, home, x + 69 as f64, y + 152 as f64, road
+    )
+}
+
 fn generate_svg(
+    user_name: String,
     year: i32,
     start_date: NaiveDate,
     weeks: usize,
@@ -78,6 +90,7 @@ fn generate_svg(
     const HEIGHT: u32 = 465;
 
     let cells = generate_contribution_cells(year, start_date, weeks, commits);
+    let home = generate_home(user_name);
 
     format!(
         r##"
@@ -90,8 +103,9 @@ fn generate_svg(
         >
             <rect width="100%" height="100%" fill="#a5c543" />
             <g>{}</g>
+            <g>{}</g>
         </svg>
         "##,
-        width, HEIGHT, width, HEIGHT, cells
+        width, HEIGHT, width, HEIGHT, home, cells
     )
 }
