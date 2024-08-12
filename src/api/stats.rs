@@ -104,9 +104,18 @@ pub async fn get_stats(user_name: String, token: String) -> Result<User, Vec<Err
         }
     });
 
-    let response = github_graphql_request(query, &headers, data, &token)
-        .await
-        .unwrap();
+    let response = match github_graphql_request(query, &headers, data, &token).await {
+        Ok(response) => response,
+        Err(error) => {
+            println!("Error: {:?}", error);
+            return Err(vec![Error {
+                error_type: "RequestError".to_string(),
+                locations: vec![],
+                message: error.to_string(),
+                path: vec![],
+            }]);
+        }
+    };
 
     let response: ApiResponse = serde_json::from_value(response).unwrap();
 
