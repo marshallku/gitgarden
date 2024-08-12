@@ -5,6 +5,7 @@ use dotenv::dotenv;
 pub struct AppState {
     pub host: String,
     pub port: u16,
+    pub token: String,
 }
 
 impl AppState {
@@ -16,6 +17,7 @@ impl AppState {
         Self {
             host: env.host.into_owned(),
             port: env.port,
+            token: env.token.into_owned(),
         }
     }
 }

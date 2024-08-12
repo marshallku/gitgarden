@@ -4,6 +4,7 @@ use std::borrow::Cow;
 pub struct Env {
     pub port: u16,
     pub host: Cow<'static, str>,
+    pub token: Cow<'static, str>,
 }
 
 impl Env {
@@ -16,7 +17,11 @@ impl Env {
             Ok(host) => Cow::Owned(host),
             Err(_) => Cow::Owned("http://localhost/".to_string()),
         };
+        let token = match std::env::var("GITHUB_TOKEN") {
+            Ok(token) => Cow::Owned(token),
+            Err(_) => panic!("GITHUB_TOKEN is not set"),
+        };
 
-        Self { port, host }
+        Self { port, host, token }
     }
 }
