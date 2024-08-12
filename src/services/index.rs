@@ -34,14 +34,18 @@ fn generate_contribution_cells(
     for week in 0..weeks {
         for day in 0..WEEK_TO_DAY {
             let current_date = start_date + Duration::days((week * WEEK_TO_DAY + day) as i64);
+
+            if current_date.year() != year {
+                continue;
+            }
+
             let formatted_date = current_date.format("%Y-%m-%d").to_string();
 
             let x = week as u32 * (CELL_SIZE + CELL_SPACING) + GRID_LEFT_PADDING;
             let y = day as u32 * (CELL_SIZE + CELL_SPACING) + GRID_TOP_PADDING;
 
             let commit_level = commits.get(&formatted_date).unwrap_or(&0);
-            let is_same_year = current_date.year() == year;
-            let color = get_cell_color(is_same_year, commit_level);
+            let color = get_cell_color(commit_level);
 
             cells.push_str(&format!(
                 "  <rect width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" fill=\"{}\" title=\"{}\" data-level=\"{}\" />\n",
@@ -53,17 +57,13 @@ fn generate_contribution_cells(
     cells
 }
 
-fn get_cell_color(is_same_year: bool, commit_level: &u32) -> &'static str {
-    if !is_same_year {
-        "#ffffff"
-    } else {
-        match commit_level {
-            1 => "#c6e48b",
-            2 => "#7bc96f",
-            3 => "#239a3b",
-            4 => "#196127",
-            _ => "#ebedf0",
-        }
+fn get_cell_color(commit_level: &u32) -> &'static str {
+    match commit_level {
+        1 => "#c6e48b",
+        2 => "#7bc96f",
+        3 => "#239a3b",
+        4 => "#196127",
+        _ => "#ebedf0",
     }
 }
 
