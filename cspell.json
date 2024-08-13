@@ -13,6 +13,7 @@
         "Datelike",
         "dotenv",
         "Gamification",
+        "gitgarden",
         "Hasher",
         "hookform",
         "iname",
@@ -49,10 +50,5 @@
         "WEBP",
         "xlink"
     ],
-    "ignorePaths": [
-        "Cargo.lock",
-        "Cargo.toml",
-        "target",
-        "config/nginx.conf"
-    ]
+    "ignorePaths": ["Cargo.lock", "Cargo.toml", "target", "config/nginx.conf"]
 }
