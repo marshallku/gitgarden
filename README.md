@@ -1,92 +1,83 @@
-# Rust HTTP Server Template
 
-This project provides a template for building a scalable HTTP server using Rust. It includes essential components such as an HTTP server, Docker support, and a CI pipeline setup with GitHub Actions.
+# Git Garden 🌱
+
+Git Garden is a creative and engaging visualization tool that transforms your GitHub activity into a beautiful garden. Each element in your garden—whether it's a tree, flower, or decoration—represents different aspects of your contributions on GitHub. Watch your garden grow as you commit to repositories, give stars, and engage with the open-source community. Git Garden also reflects your most used programming language through visual cues in the environment, making your coding journey more interactive and fun!
+
+## Table of Contents
+
+- [Features](#features)
+- [How It Works](#how-it-works)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Features
 
-- **HTTP Server**: Built using the Axum framework for high performance.
-- **Docker & Docker Compose**: Ready-to-use Docker configurations for containerization.
-- **CI Pipeline**: GitHub Actions setup for continuous integration and deployment.
+- **Interactive Garden**: Your GitHub activity is represented by a dynamic garden where trees, flowers, and other elements grow and change.
+- **Gamification**: Earn trees by giving stars to repositories, and grow flowers by committing to your projects.
+- **Real-Time Updates**: Your garden evolves in real-time based on your GitHub activity.
+- **Language Visualization (planned)**: The most used programming language is visually reflected in the garden through color schemes, decorations, and special effects.
+- **Customizable Themes (planned)**: Different themes are available based on the programming languages you use the most.
 
-## Getting Started
+## How It Works
+
+1. **GitHub Integration**: Git Garden connects to your GitHub account to track your contributions, repositories, stars, and more.
+2. **Visualization**: Based on your activities, the garden elements grow and change. Each element (like a tree or flower) represents a different kind of activity.
+3. **Language Representation (planned)**: The most used programming language in your repositories influences the appearance of your garden—whether through colors, shapes, or seasonal themes.
+
+### Example
+
+- **Commit More, Grow More**: Every time you commit to a project, a new flower blooms in your garden.
+- **Star Repositories, Grow Trees**: Give stars to other repositories, and watch trees sprout up in your garden.
+- **Language Influence (planned)**: If JavaScript is your most used language, the garden might show yellow flowers, while Python could bring a green theme.
+
+## Installation
 
 ### Prerequisites
 
-- **Rust**: Ensure you have Rust installed. You can install it from [rust-lang.org](https://www.rust-lang.org/).
-- **Docker**: Install Docker from [docker.com](https://www.docker.com/).
-- **GitHub Actions**: No setup required on your local machine; configuration files are included in the repository.
+- [Rust](https://www.rust-lang.org/)
+- [Docker](https://www.docker.com/)
+- [GitHub API Token](https://github.com/settings/tokens) for accessing GitHub data
 
-### Project Structure
+### Clone the Repository
 
-- `src/main.rs`: Entry point for the application.
-- `src/env/`: Handles environment variable parsing. And handles structure for application state.
-- `src/routes/`: Defines application routes.
-- `src/utils/`: Utility functions.
-- `**/__tests__/`: Tests for the application.
-- `Dockerfile`: Docker image definition.
-- `docker-compose.yml`: Docker Compose configuration for development and production.
-- `.github/workflows/ci.yml`: GitHub Actions configuration for CI pipeline.
+```bash
+git clone https://github.com/your-username/git-garden.git
+cd git-garden
+```
 
-### Setup & Installation
+### Set Up Environment Variables
 
-1. **Clone the repository**:
+Create a `.env` file in the root of your project and add your GitHub API token:
 
-   ```bash
-   git clone https://github.com/marshallku/http_server_template.git
-   cd http_server_template
-   ```
+```bash
+GITHUB_TOKEN=your_github_api_token_here
+```
 
-2. **Set up environment variables**:
-   Create a `.env` file (or copy `.env.example` to `.env`) at the project root and define the necessary environment variables. For example:
+### Run the Application
 
-   ```bash
-   HOST=127.0.0.1
-   PORT=18080
-   ```
+```bash
+cargo run
+# or
+docker compose up
+```
 
-3. **Run the application locally**:
+## Usage
 
-   ```bash
-   cargo run
-   ```
-
-   The server will start at the address defined in your environment variables (default: `http://127.0.0.1:18080`).
-
-### Docker & Docker Compose
-
-To build and run the application using Docker:
-
-1. **Build the Docker image**:
-
-   ```bash
-   docker build -t rust-http-server-template .
-   ```
-
-2. **Run the container**:
-
-   ```bash
-   docker run -p 18080:18080 rust-http-server-template
-   ```
-
-   Alternatively, use Docker Compose for easier management:
-
-   ```bash
-   docker compose up
-   ```
-
-### Continuous Integration
-
-The project includes a GitHub Actions workflow for CI. It performs the following steps:
-
-- **Spell Check**: Checks for spelling errors in source code.
-- **Build**: Compiles the Rust project.
-- **Test**: Runs unit and integration tests.
-
-The workflow is defined in `.github/workflows/ci.yml`. It triggers on every push and pull request to the `master` branch.
+1. **Connect Your GitHub Account**: Log in with your GitHub account to start visualizing your activity.
+2. **Watch Your Garden Grow**: As you code, commit, and contribute, return to your garden to see how it evolves.
+3. **Explore Different Themes (planned)**: Use the settings to explore different themes based on your most used programming languages.
 
 ## Contributing
 
-Contributions are welcome! Please submit a pull request or open an issue to discuss any changes.
+Contributions are welcome! To contribute:
+
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feat/your-feature-name`).
+3. Commit your changes (`git commit -m 'Add your feature'`).
+4. Push to the branch (`git push origin feat/your-feature-name`).
+5. Open a pull request.
 
 ## License
 
