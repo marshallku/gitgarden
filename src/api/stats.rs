@@ -3,11 +3,9 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct ApiResponse {
-    pub data: Option<Data>,
-    pub errors: Option<Vec<Error>>,
-}
+use crate::utils::github::github_graphql_request;
+
+use super::structures::{GithubGraphQLError, GithubGraphQLResponse};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Data {
@@ -57,24 +55,7 @@ pub struct RepositoriesContributedTo {
     pub total_count: i32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Error {
-    #[serde(rename = "type")]
-    pub error_type: String,
-    pub path: Vec<String>,
-    pub locations: Vec<Location>,
-    pub message: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Location {
-    pub line: i32,
-    pub column: i32,
-}
-
-use crate::utils::github::github_graphql_request;
-
-pub async fn get_stats(user_name: String, token: String) -> Result<User, Vec<Error>> {
+pub async fn get_stats(user_name: String, token: String) -> Result<User, Vec<GithubGraphQLError>> {
     let query = r#"
     query UserStats($login: String!) {
         user(login: $login) {
@@ -108,7 +89,7 @@ pub async fn get_stats(user_name: String, token: String) -> Result<User, Vec<Err
         Ok(response) => response,
         Err(error) => {
             println!("Error: {:?}", error);
-            return Err(vec![Error {
+            return Err(vec![GithubGraphQLError {
                 error_type: "RequestError".to_string(),
                 locations: vec![],
                 message: error.to_string(),
@@ -117,14 +98,14 @@ pub async fn get_stats(user_name: String, token: String) -> Result<User, Vec<Err
         }
     };
 
-    let response: ApiResponse = serde_json::from_value(response).unwrap();
+    let response: GithubGraphQLResponse<Data> = serde_json::from_value(response).unwrap();
 
     match response {
-        ApiResponse {
+        GithubGraphQLResponse {
             data: Some(data),
             errors: None,
         } => Ok(data.user.unwrap()),
-        ApiResponse {
+        GithubGraphQLResponse {
             data: None,
             errors: Some(errors),
         } => Err(errors),
