@@ -3,7 +3,11 @@ use std::collections::HashMap;
 use crate::{
     api::{contributions::get_daily_commits, stats::get_stats},
     env::state::AppState,
-    utils::{coordinate::generate_coordinate, date::get_year_range, encode::encode_from_path},
+    utils::{
+        coordinate::generate_coordinate,
+        date::{calculate_weeks, get_year_range, WEEK_TO_DAY},
+        encode::encode_from_path,
+    },
 };
 use chrono::{Datelike, Duration, NaiveDate};
 
@@ -11,7 +15,6 @@ const CELL_SIZE: u32 = 16;
 const CELL_SPACING: u32 = 4;
 const GRID_LEFT_PADDING: u32 = 24;
 const GRID_TOP_PADDING: u32 = 312;
-const WEEK_TO_DAY: usize = 7;
 
 pub async fn render_farm_service(user_name: String, year: i32, state: AppState) -> String {
     let commits = get_daily_commits(&user_name, year).await.unwrap();
@@ -19,10 +22,6 @@ pub async fn render_farm_service(user_name: String, year: i32, state: AppState) 
     let weeks = calculate_weeks(start_date, end_date);
 
     generate_svg(user_name, year, state, start_date, weeks, commits).await
-}
-
-fn calculate_weeks(start_date: NaiveDate, end_date: NaiveDate) -> usize {
-    ((end_date - start_date).num_days() / WEEK_TO_DAY as i64 + 1) as usize
 }
 
 fn generate_contribution_cells(
