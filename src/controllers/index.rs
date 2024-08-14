@@ -3,6 +3,7 @@ use axum::{
     http::HeaderMap,
     response::IntoResponse,
 };
+use chrono::Datelike;
 use reqwest::StatusCode;
 use serde::Deserialize;
 
@@ -11,7 +12,7 @@ use crate::{env::state::AppState, services::render_farm::render_farm_service};
 #[derive(Deserialize)]
 pub struct Options {
     user_name: String,
-    year: i32,
+    year: Option<i32>,
 }
 
 pub async fn get(
@@ -25,7 +26,12 @@ pub async fn get(
     headers.insert("Pragma", "no-cache".parse().unwrap());
     headers.insert("Expires", "0".parse().unwrap());
 
-    let response = render_farm_service(user_name, year, state).await;
+    let response = render_farm_service(
+        user_name,
+        year.unwrap_or_else(|| chrono::Local::now().year()),
+        state,
+    )
+    .await;
 
     (StatusCode::OK, headers, response)
 }
