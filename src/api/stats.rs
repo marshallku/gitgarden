@@ -75,7 +75,8 @@ pub async fn get_stats(user_name: String, token: String) -> Result<User, Vec<Git
                 totalCount
             }
         }
-    }"#;
+    }
+    "#;
 
     let headers: HashMap<&str, &str> = HashMap::new();
 
