@@ -180,9 +180,13 @@ fn generate_trees(user_name: &str, width: u32, repositories_contributed_to: i32)
     coords.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
 
     for (x, y) in coords {
-        let (tree_kind, _) = generate_coordinate("{}-tree-kind-{}", (1.0, 2.0), (1.0, 2.0));
-        let tree = match tree_kind as u32 {
-            1 => Objects::TreeOne.to_string(),
+        let (tree_kind, _) = generate_coordinate(
+            &format!("{}-tree-kind-{}", user_name, x + y),
+            (1.0, 2.0),
+            (1.0, 2.0),
+        );
+        let tree = match tree_kind.round() {
+            1.0 => Objects::TreeOne.to_string(),
             _ => Objects::TreeTwo.to_string(),
         };
 
