@@ -5,20 +5,19 @@ use crate::{
         contributions::get_daily_commits,
         stats::{get_stats, ContributionsCollection},
     },
+    constants::{
+        date::WEEK_TO_DAY,
+        render::{CELL_SIZE, CELL_SPACING, GRID_LEFT_PADDING, GRID_TOP_PADDING},
+    },
     env::state::AppState,
     render::objects::Objects,
     utils::{
         coordinate::generate_coordinate,
-        date::{calculate_weeks, get_year_range, WEEK_TO_DAY},
+        date::{calculate_weeks, get_year_range},
         encode::encode_from_path,
     },
 };
 use chrono::{Datelike, Duration, NaiveDate};
-
-const CELL_SIZE: u32 = 16;
-const CELL_SPACING: u32 = 4;
-const GRID_LEFT_PADDING: u32 = 24;
-const GRID_TOP_PADDING: u32 = 312;
 
 fn register_objects() -> String {
     let mut objects = String::new();

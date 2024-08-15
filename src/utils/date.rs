@@ -1,6 +1,6 @@
 use chrono::{Datelike, Duration, NaiveDate};
 
-pub const WEEK_TO_DAY: usize = 7;
+use crate::constants::date::WEEK_TO_DAY;
 
 pub fn get_year_range(year: i32) -> Option<(NaiveDate, NaiveDate)> {
     let first_day = NaiveDate::from_ymd_opt(year, 1, 1)?;
