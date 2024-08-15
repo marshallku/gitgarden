@@ -200,105 +200,60 @@ fn generate_home(user_name: String) -> String {
 }
 
 fn generate_grasses(
-    user_name: String,
+    user_name: &str,
     width: u32,
     contributions_collection: ContributionsCollection,
 ) -> String {
-    let mut grasses = String::new();
     let x_max = width as f64 - 16.0;
     let y_max = 300.0;
 
-    for i in 0..contributions_collection.total_issue_contributions {
-        let (x, y) = generate_coordinate(
-            &format!("{}-grass-1-{}", user_name, i),
-            (0.0, x_max),
-            (0.0, y_max),
-        );
+    let grass_types = [
+        (
+            Objects::GrassOne,
+            contributions_collection.total_issue_contributions,
+        ),
+        (
+            Objects::GrassTwo,
+            contributions_collection.total_pull_request_contributions,
+        ),
+        (
+            Objects::GrassThree,
+            contributions_collection.total_pull_request_review_contributions,
+        ),
+        (
+            Objects::GrassFour,
+            contributions_collection.total_repositories_with_contributed_issues,
+        ),
+        (
+            Objects::GrassFive,
+            contributions_collection.total_repositories_with_contributed_pull_requests,
+        ),
+        (
+            Objects::GrassSix,
+            contributions_collection.total_repositories_with_contributed_pull_request_reviews,
+        ),
+    ];
 
-        grasses.push_str(&format!(
-            "<use x=\"{}\" y=\"{}\" xlink:href=\"#{}\" />",
-            x,
-            y,
-            Objects::GrassOne.to_string()
-        ));
-    }
-
-    for i in 0..contributions_collection.total_pull_request_contributions {
-        let (x, y) = generate_coordinate(
-            &format!("{}-grass-2-{}", user_name, i),
-            (0.0, x_max),
-            (0.0, y_max),
-        );
-
-        grasses.push_str(&format!(
-            "<use x=\"{}\" y=\"{}\" xlink:href=\"#{}\" />",
-            x,
-            y,
-            Objects::GrassTwo.to_string()
-        ));
-    }
-
-    for i in 0..contributions_collection.total_pull_request_review_contributions {
-        let (x, y) = generate_coordinate(
-            &format!("{}-grass-3-{}", user_name, i),
-            (0.0, x_max),
-            (0.0, y_max),
-        );
-
-        grasses.push_str(&format!(
-            "<use x=\"{}\" y=\"{}\" xlink:href=\"#{}\" />",
-            x,
-            y,
-            Objects::GrassThree.to_string()
-        ));
-    }
-
-    for i in 0..contributions_collection.total_repositories_with_contributed_issues {
-        let (x, y) = generate_coordinate(
-            &format!("{}-grass-4-{}", user_name, i),
-            (0.0, x_max),
-            (0.0, y_max),
-        );
-
-        grasses.push_str(&format!(
-            "<use x=\"{}\" y=\"{}\" xlink:href=\"#{}\" />",
-            x,
-            y,
-            Objects::GrassFour.to_string()
-        ));
-    }
-
-    for i in 0..contributions_collection.total_repositories_with_contributed_pull_requests {
-        let (x, y) = generate_coordinate(
-            &format!("{}-grass-5-{}", user_name, i),
-            (0.0, x_max),
-            (0.0, y_max),
-        );
-
-        grasses.push_str(&format!(
-            "<use x=\"{}\" y=\"{}\" xlink:href=\"#{}\" />",
-            x,
-            y,
-            Objects::GrassFive.to_string()
-        ));
-    }
-
-    for i in 0..contributions_collection.total_repositories_with_contributed_pull_request_reviews {
-        let (x, y) = generate_coordinate(
-            &format!("{}-grass-6-{}", user_name, i),
-            (0.0, x_max),
-            (0.0, y_max),
-        );
-
-        grasses.push_str(&format!(
-            "<use x=\"{}\" y=\"{}\" xlink:href=\"#{}\" />",
-            x,
-            y,
-            Objects::GrassSix.to_string()
-        ));
-    }
-
-    grasses
+    grass_types
+        .iter()
+        .enumerate()
+        .flat_map(|(index, (grass_type, count))| {
+            (0..*count).map(move |i| {
+                let (x, y) = generate_coordinate(
+                    &format!("{}-grass-{}-{}", user_name, index + 1, i),
+                    (0.0, x_max),
+                    (0.0, y_max),
+                );
+                format!(
+                    "<use x=\"{}\" y=\"{}\" xlink:href=\"#{}\" />",
+                    x,
+                    y,
+                    grass_type.to_string()
+                )
+            })
+        })
+        .collect::<Vec<String>>()
+        .join("")
 }
 
 fn generate_trees(user_name: String, width: u32, repositories_contributed_to: i32) -> String {
@@ -363,7 +318,7 @@ async fn generate_svg(
     let cells = generate_contribution_cells(year, start_date, weeks, commits);
     let home = generate_home(user_name.clone());
     let grasses = generate_grasses(
-        user_name.clone(),
+        &user_name,
         width.clone(),
         stats.contributions_collection.clone(),
     );
