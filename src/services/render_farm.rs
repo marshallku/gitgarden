@@ -16,6 +16,93 @@ const CELL_SPACING: u32 = 4;
 const GRID_LEFT_PADDING: u32 = 24;
 const GRID_TOP_PADDING: u32 = 312;
 
+#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
+pub enum Objects {
+    FlowerOne,
+    FlowerTwo,
+    FlowerThree,
+    FlowerFour,
+    FlowerFive,
+    TreeOne,
+    TreeTwo,
+    Dirt,
+}
+
+impl Objects {
+    pub fn to_string(&self) -> String {
+        match self {
+            Objects::FlowerOne => "flower-1".to_string(),
+            Objects::FlowerTwo => "flower-2".to_string(),
+            Objects::FlowerThree => "flower-3".to_string(),
+            Objects::FlowerFour => "flower-4".to_string(),
+            Objects::FlowerFive => "flower-5".to_string(),
+            Objects::TreeOne => "tree-1".to_string(),
+            Objects::TreeTwo => "tree-2".to_string(),
+            Objects::Dirt => "dirt".to_string(),
+        }
+    }
+
+    pub fn to_path(&self) -> String {
+        match self {
+            Objects::FlowerOne => "flowers/1-1.png".to_string(),
+            Objects::FlowerTwo => "flowers/1-2.png".to_string(),
+            Objects::FlowerThree => "flowers/1-3.png".to_string(),
+            Objects::FlowerFour => "flowers/1-4.png".to_string(),
+            Objects::FlowerFive => "flowers/1-5.png".to_string(),
+            Objects::TreeOne => "objects/tree1.png".to_string(),
+            Objects::TreeTwo => "objects/tree2.png".to_string(),
+            Objects::Dirt => "field/dirt2.png".to_string(),
+        }
+    }
+
+    pub fn to_size(&self) -> (u32, u32) {
+        match self {
+            Objects::FlowerOne => (16, 16),
+            Objects::FlowerTwo => (16, 16),
+            Objects::FlowerThree => (16, 16),
+            Objects::FlowerFour => (16, 16),
+            Objects::FlowerFive => (16, 16),
+            Objects::TreeOne => (35, 60),
+            Objects::TreeTwo => (35, 60),
+            Objects::Dirt => (16, 16),
+        }
+    }
+
+    pub fn iter() -> impl Iterator<Item = Objects> {
+        [
+            Objects::FlowerOne,
+            Objects::FlowerTwo,
+            Objects::FlowerThree,
+            Objects::FlowerFour,
+            Objects::FlowerFive,
+            Objects::TreeOne,
+            Objects::TreeTwo,
+            Objects::Dirt,
+        ]
+        .iter()
+        .copied()
+    }
+}
+
+fn register_objects() -> String {
+    let mut objects = String::new();
+
+    for object in Objects::iter() {
+        let path = object.to_path();
+        let encoded = encode_from_path(&path);
+
+        objects.push_str(&format!(
+            "<image id=\"{}\" width=\"{}\" height=\"{}\" xlink:href=\"data:image/png;base64,{}\" />",
+            object.to_string(),
+            object.to_size().0,
+            object.to_size().1,
+            encoded
+        ));
+    }
+
+    objects
+}
+
 pub async fn render_farm_service(user_name: String, year: i32, state: AppState) -> String {
     let commits = get_daily_commits(&user_name, year).await.unwrap();
     let (start_date, end_date) = get_year_range(year).unwrap();
@@ -47,19 +134,25 @@ fn generate_contribution_cells(
 
             let commit_level = commits.get(&formatted_date).unwrap_or(&0);
 
-            let field = encode_from_path("field/dirt2.png");
-
             cells.push_str(&format!(
-                "<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" xlink:href=\"data:image/png;base64,{}\" />",
-                CELL_SIZE, CELL_SIZE, x, y, field
+                "<use  x=\"{}\" y=\"{}\" xlink:href=\"#{}\" />",
+                x,
+                y,
+                Objects::Dirt.to_string()
             ));
 
             if *commit_level > 0 {
-                let flower = encode_from_path(&format!("flowers/1-{}.png", commit_level));
+                let flower = match *commit_level {
+                    1 => Objects::FlowerOne.to_string(),
+                    2 => Objects::FlowerTwo.to_string(),
+                    3 => Objects::FlowerThree.to_string(),
+                    4 => Objects::FlowerFour.to_string(),
+                    _ => Objects::FlowerFive.to_string(),
+                };
 
                 cells.push_str(&format!(
-                    "<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" xlink:href=\"data:image/png;base64,{}\" />",
-                    CELL_SIZE, CELL_SIZE, x, y, flower
+                    "<use x=\"{}\" y=\"{}\" xlink:href=\"#{}\" />",
+                    x, y, flower
                 ));
             }
         }
@@ -95,11 +188,14 @@ fn generate_trees(user_name: String, width: u32, repositories_contributed_to: i3
     coords.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
 
     for (x, y) in coords {
-        let (tree, _) = generate_coordinate("{}-tree-kind-{}", (1.0, 2.0), (1.0, 2.0));
-        let tree = encode_from_path(format!("objects/tree{}.png", tree.round() as i32).as_str());
+        let (tree_kind, _) = generate_coordinate("{}-tree-kind-{}", (1.0, 2.0), (1.0, 2.0));
+        let tree = match tree_kind as u32 {
+            1 => Objects::TreeOne.to_string(),
+            _ => Objects::TreeTwo.to_string(),
+        };
 
         trees.push_str(&format!(
-            "<image width=\"35\" height=\"60\" x=\"{}\" y=\"{}\" xlink:href=\"data:image/png;base64,{}\" />",
+            "<use x=\"{}\" y=\"{}\" xlink:href=\"#{}\" />",
             x, y, tree
         ));
     }
@@ -128,6 +224,7 @@ async fn generate_svg(
 
     println!("{:?}", stats);
 
+    let objects = register_objects();
     let cells = generate_contribution_cells(year, start_date, weeks, commits);
     let home = generate_home(user_name.clone());
     let trees = generate_trees(
@@ -146,11 +243,12 @@ async fn generate_svg(
             style="width: {}px; height: {}px;"
         >
             <rect width="100%" height="100%" fill="#a5c543" />
+            <defs>{}</defs>
             <g>{}</g>
             <g>{}</g>
             <g>{}</g>
         </svg>
         "##,
-        width, HEIGHT, width, HEIGHT, trees, home, cells
+        width, HEIGHT, width, HEIGHT, objects, trees, home, cells
     )
 }
