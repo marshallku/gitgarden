@@ -9,6 +9,7 @@ use utils::log::trace_layer_on_request;
 mod api;
 mod controllers;
 mod env;
+mod render;
 mod services;
 mod utils;
 
