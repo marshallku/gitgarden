@@ -14,67 +14,73 @@ pub struct Data {
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct User {
-    #[serde(rename = "starredRepositories")]
-    pub starred_repositories: StarredRepositories,
+    pub login: String,
     #[serde(rename = "contributionsCollection")]
     pub contributions_collection: ContributionsCollection,
-    #[serde(rename = "pullRequests")]
-    pub pull_requests: PullRequests,
-    pub issues: Issues,
-    #[serde(rename = "repositoriesContributedTo")]
-    pub repositories_contributed_to: RepositoriesContributedTo,
-}
-
-#[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct StarredRepositories {
-    #[serde(rename = "totalCount")]
-    pub total_count: i32,
+    pub repositories: Repositories,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct ContributionsCollection {
     #[serde(rename = "totalCommitContributions")]
     pub total_commit_contributions: i32,
+    #[serde(rename = "totalIssueContributions")]
+    pub total_issue_contributions: i32,
+    #[serde(rename = "totalPullRequestContributions")]
+    pub total_pull_request_contributions: i32,
+    #[serde(rename = "totalPullRequestReviewContributions")]
+    pub total_pull_request_review_contributions: i32,
+    #[serde(rename = "totalRepositoriesWithContributedCommits")]
+    pub total_repositories_with_contributed_commits: i32,
+    #[serde(rename = "totalRepositoriesWithContributedIssues")]
+    pub total_repositories_with_contributed_issues: i32,
+    #[serde(rename = "totalRepositoriesWithContributedPullRequests")]
+    pub total_repositories_with_contributed_pull_requests: i32,
+    #[serde(rename = "totalRepositoriesWithContributedPullRequestReviews")]
+    pub total_repositories_with_contributed_pull_request_reviews: i32,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct PullRequests {
+pub struct Repositories {
     #[serde(rename = "totalCount")]
-    pub total_count: i32,
+    pub total_count: u32,
+    pub nodes: Vec<Repository>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct Issues {
-    #[serde(rename = "totalCount")]
-    pub total_count: i32,
+pub struct Repository {
+    pub name: String,
+    #[serde(rename = "pushedAt")]
+    pub pushed_at: String,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct RepositoriesContributedTo {
-    #[serde(rename = "totalCount")]
-    pub total_count: i32,
-}
-
-pub async fn get_stats(user_name: String, token: String) -> Result<User, Vec<GithubGraphQLError>> {
+pub async fn get_stats(
+    user_name: String,
+    from: String,
+    to: String,
+    token: String,
+) -> Result<User, Vec<GithubGraphQLError>> {
     let query = r#"
-    query UserStats($login: String!) {
+    query($login: String!, $from: DateTime!, $to: DateTime!) {
         user(login: $login) {
-            starredRepositories {
-                totalCount
-            }
-            contributionsCollection {
+            login contributionsCollection(from: $from, to: $to) {
                 totalCommitContributions
+                totalIssueContributions
+                totalPullRequestContributions
+                totalPullRequestReviewContributions
+                totalRepositoriesWithContributedCommits
+                totalRepositoriesWithContributedIssues
+                totalRepositoriesWithContributedPullRequests
+                totalRepositoriesWithContributedPullRequestReviews
             }
-            pullRequests {
+            repositories(first: 100, orderBy: {field: PUSHED_AT, direction: DESC}) {
                 totalCount
+                nodes {
+                    name
+                    pushedAt
+                }
             }
-            issues {
-                totalCount
-            }
-            repositoriesContributedTo {
-                totalCount
-            }
-        }
+        } 
     }
     "#;
 
@@ -82,7 +88,9 @@ pub async fn get_stats(user_name: String, token: String) -> Result<User, Vec<Git
 
     let data = json!({
         "variables": {
-            "login": user_name
+            "login": user_name,
+            "from": from,
+            "to": to,
         }
     });
 

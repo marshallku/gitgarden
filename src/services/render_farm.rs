@@ -214,7 +214,13 @@ async fn generate_svg(
     let width = weeks as u32 * (CELL_SIZE + CELL_SPACING) + GRID_LEFT_PADDING * 2;
     const HEIGHT: u32 = 465;
 
-    let stats = get_stats(user_name.clone(), state.token.clone()).await;
+    let stats = get_stats(
+        user_name.clone(),
+        format!("{}-01-01T00:00:00Z", year),
+        format!("{}-12-31T23:59:59Z", year),
+        state.token.clone(),
+    )
+    .await;
 
     if stats.is_err() {
         return String::new();
@@ -230,7 +236,10 @@ async fn generate_svg(
     let trees = generate_trees(
         user_name,
         width.clone(),
-        stats.clone().repositories_contributed_to.total_count,
+        stats
+            .clone()
+            .contributions_collection
+            .total_repositories_with_contributed_commits,
     );
 
     format!(
