@@ -131,7 +131,7 @@ fn register_objects() -> String {
     objects
 }
 
-pub async fn render_farm_service(user_name: String, year: i32, state: AppState) -> String {
+pub async fn render_farm_service(user_name: &str, year: i32, state: AppState) -> String {
     let commits = get_daily_commits(&user_name, year).await.unwrap();
     let (start_date, end_date) = get_year_range(year).unwrap();
     let weeks = calculate_weeks(start_date, end_date);
@@ -188,7 +188,7 @@ fn generate_contribution_cells(
     cells
 }
 
-fn generate_home(user_name: String) -> String {
+fn generate_home(user_name: &str) -> String {
     let (x, y) = generate_coordinate(user_name, (80.0, 730.0), (25.0, 70.0));
     let home = encode_from_path("objects/home.png");
     let road = encode_from_path("objects/stone_road.png");
@@ -202,7 +202,7 @@ fn generate_home(user_name: String) -> String {
 fn generate_grasses(
     user_name: &str,
     width: u32,
-    contributions_collection: ContributionsCollection,
+    contributions_collection: &ContributionsCollection,
 ) -> String {
     let x_max = width as f64 - 16.0;
     let y_max = 300.0;
@@ -256,7 +256,7 @@ fn generate_grasses(
         .join("")
 }
 
-fn generate_trees(user_name: String, width: u32, repositories_contributed_to: i32) -> String {
+fn generate_trees(user_name: &str, width: u32, repositories_contributed_to: i32) -> String {
     let mut trees = String::new();
     let tree_count = repositories_contributed_to;
     let mut coords: Vec<(f64, f64)> = (0..tree_count)
@@ -288,7 +288,7 @@ fn generate_trees(user_name: String, width: u32, repositories_contributed_to: i3
 }
 
 async fn generate_svg(
-    user_name: String,
+    user_name: &str,
     year: i32,
     state: AppState,
     start_date: NaiveDate,
@@ -299,10 +299,10 @@ async fn generate_svg(
     const HEIGHT: u32 = 465;
 
     let stats = get_stats(
-        user_name.clone(),
+        &user_name,
         format!("{}-01-01T00:00:00Z", year),
         format!("{}-12-31T23:59:59Z", year),
-        state.token.clone(),
+        state.token,
     )
     .await;
 
@@ -316,17 +316,12 @@ async fn generate_svg(
 
     let objects = register_objects();
     let cells = generate_contribution_cells(year, start_date, weeks, commits);
-    let home = generate_home(user_name.clone());
-    let grasses = generate_grasses(
-        &user_name,
-        width.clone(),
-        stats.contributions_collection.clone(),
-    );
+    let home = generate_home(&user_name);
+    let grasses = generate_grasses(&user_name, width, &stats.contributions_collection);
     let trees = generate_trees(
-        user_name,
-        width.clone(),
+        &user_name,
+        width,
         stats
-            .clone()
             .contributions_collection
             .total_repositories_with_contributed_commits,
     );

@@ -27,7 +27,7 @@ pub async fn get(
     headers.insert("Expires", "0".parse().unwrap());
 
     let response = render_farm_service(
-        user_name,
+        &user_name,
         year.unwrap_or_else(|| chrono::Local::now().year()),
         state,
     )

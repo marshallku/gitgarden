@@ -40,7 +40,7 @@ pub struct ContributionsCollection {
 }
 
 pub async fn get_stats(
-    user_name: String,
+    user_name: &str,
     from: String,
     to: String,
     token: String,
