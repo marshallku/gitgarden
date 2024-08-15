@@ -1,7 +1,10 @@
 use std::collections::HashMap;
 
 use crate::{
-    api::{contributions::get_daily_commits, stats::get_stats},
+    api::{
+        contributions::get_daily_commits,
+        stats::{get_stats, ContributionsCollection},
+    },
     env::state::AppState,
     utils::{
         coordinate::generate_coordinate,
@@ -24,6 +27,12 @@ pub enum Objects {
     FlowerFour,
     TreeOne,
     TreeTwo,
+    GrassOne,
+    GrassTwo,
+    GrassThree,
+    GrassFour,
+    GrassFive,
+    GrassSix,
     Dirt,
 }
 
@@ -36,6 +45,12 @@ impl Objects {
             Objects::FlowerFour => "flower-4".to_string(),
             Objects::TreeOne => "tree-1".to_string(),
             Objects::TreeTwo => "tree-2".to_string(),
+            Objects::GrassOne => "grass-1".to_string(),
+            Objects::GrassTwo => "grass-2".to_string(),
+            Objects::GrassThree => "grass-3".to_string(),
+            Objects::GrassFour => "grass-4".to_string(),
+            Objects::GrassFive => "grass-5".to_string(),
+            Objects::GrassSix => "grass-6".to_string(),
             Objects::Dirt => "dirt".to_string(),
         }
     }
@@ -48,6 +63,12 @@ impl Objects {
             Objects::FlowerFour => "flowers/1-4.png".to_string(),
             Objects::TreeOne => "objects/tree1.png".to_string(),
             Objects::TreeTwo => "objects/tree2.png".to_string(),
+            Objects::GrassOne => "field/grass1.png".to_string(),
+            Objects::GrassTwo => "field/grass2.png".to_string(),
+            Objects::GrassThree => "field/grass3.png".to_string(),
+            Objects::GrassFour => "field/grass4.png".to_string(),
+            Objects::GrassFive => "field/grass5.png".to_string(),
+            Objects::GrassSix => "field/grass6.png".to_string(),
             Objects::Dirt => "field/dirt2.png".to_string(),
         }
     }
@@ -60,6 +81,12 @@ impl Objects {
             Objects::FlowerFour => (16, 16),
             Objects::TreeOne => (35, 60),
             Objects::TreeTwo => (35, 60),
+            Objects::GrassOne => (16, 16),
+            Objects::GrassTwo => (16, 16),
+            Objects::GrassThree => (16, 16),
+            Objects::GrassFour => (16, 16),
+            Objects::GrassFive => (16, 16),
+            Objects::GrassSix => (16, 16),
             Objects::Dirt => (16, 16),
         }
     }
@@ -72,6 +99,12 @@ impl Objects {
             Objects::FlowerFour,
             Objects::TreeOne,
             Objects::TreeTwo,
+            Objects::GrassOne,
+            Objects::GrassTwo,
+            Objects::GrassThree,
+            Objects::GrassFour,
+            Objects::GrassFive,
+            Objects::GrassSix,
             Objects::Dirt,
         ]
         .iter()
@@ -166,6 +199,108 @@ fn generate_home(user_name: String) -> String {
     )
 }
 
+fn generate_grasses(
+    user_name: String,
+    width: u32,
+    contributions_collection: ContributionsCollection,
+) -> String {
+    let mut grasses = String::new();
+    let x_max = width as f64 - 16.0;
+    let y_max = 300.0;
+
+    for i in 0..contributions_collection.total_issue_contributions {
+        let (x, y) = generate_coordinate(
+            &format!("{}-grass-1-{}", user_name, i),
+            (0.0, x_max),
+            (0.0, y_max),
+        );
+
+        grasses.push_str(&format!(
+            "<use x=\"{}\" y=\"{}\" xlink:href=\"#{}\" />",
+            x,
+            y,
+            Objects::GrassOne.to_string()
+        ));
+    }
+
+    for i in 0..contributions_collection.total_pull_request_contributions {
+        let (x, y) = generate_coordinate(
+            &format!("{}-grass-2-{}", user_name, i),
+            (0.0, x_max),
+            (0.0, y_max),
+        );
+
+        grasses.push_str(&format!(
+            "<use x=\"{}\" y=\"{}\" xlink:href=\"#{}\" />",
+            x,
+            y,
+            Objects::GrassTwo.to_string()
+        ));
+    }
+
+    for i in 0..contributions_collection.total_pull_request_review_contributions {
+        let (x, y) = generate_coordinate(
+            &format!("{}-grass-3-{}", user_name, i),
+            (0.0, x_max),
+            (0.0, y_max),
+        );
+
+        grasses.push_str(&format!(
+            "<use x=\"{}\" y=\"{}\" xlink:href=\"#{}\" />",
+            x,
+            y,
+            Objects::GrassThree.to_string()
+        ));
+    }
+
+    for i in 0..contributions_collection.total_repositories_with_contributed_issues {
+        let (x, y) = generate_coordinate(
+            &format!("{}-grass-4-{}", user_name, i),
+            (0.0, x_max),
+            (0.0, y_max),
+        );
+
+        grasses.push_str(&format!(
+            "<use x=\"{}\" y=\"{}\" xlink:href=\"#{}\" />",
+            x,
+            y,
+            Objects::GrassFour.to_string()
+        ));
+    }
+
+    for i in 0..contributions_collection.total_repositories_with_contributed_pull_requests {
+        let (x, y) = generate_coordinate(
+            &format!("{}-grass-5-{}", user_name, i),
+            (0.0, x_max),
+            (0.0, y_max),
+        );
+
+        grasses.push_str(&format!(
+            "<use x=\"{}\" y=\"{}\" xlink:href=\"#{}\" />",
+            x,
+            y,
+            Objects::GrassFive.to_string()
+        ));
+    }
+
+    for i in 0..contributions_collection.total_repositories_with_contributed_pull_request_reviews {
+        let (x, y) = generate_coordinate(
+            &format!("{}-grass-6-{}", user_name, i),
+            (0.0, x_max),
+            (0.0, y_max),
+        );
+
+        grasses.push_str(&format!(
+            "<use x=\"{}\" y=\"{}\" xlink:href=\"#{}\" />",
+            x,
+            y,
+            Objects::GrassSix.to_string()
+        ));
+    }
+
+    grasses
+}
+
 fn generate_trees(user_name: String, width: u32, repositories_contributed_to: i32) -> String {
     let mut trees = String::new();
     let tree_count = repositories_contributed_to;
@@ -227,6 +362,11 @@ async fn generate_svg(
     let objects = register_objects();
     let cells = generate_contribution_cells(year, start_date, weeks, commits);
     let home = generate_home(user_name.clone());
+    let grasses = generate_grasses(
+        user_name.clone(),
+        width.clone(),
+        stats.contributions_collection.clone(),
+    );
     let trees = generate_trees(
         user_name,
         width.clone(),
@@ -250,8 +390,9 @@ async fn generate_svg(
             <g>{}</g>
             <g>{}</g>
             <g>{}</g>
+            <g>{}</g>
         </svg>
         "##,
-        width, HEIGHT, width, HEIGHT, objects, trees, home, cells
+        width, HEIGHT, width, HEIGHT, objects, grasses, trees, home, cells
     )
 }
