@@ -1,5 +1,6 @@
-
 # Git Garden 🌱
+
+![gitgarden](https://github.com/user-attachments/assets/051c0c51-f257-4163-9109-ec21cdebfc9e)
 
 Git Garden is a creative and engaging visualization tool that transforms your GitHub activity into a beautiful garden. Each element in your garden—whether it's a tree, flower, or decoration—represents different aspects of your contributions on GitHub. Watch your garden grow as you commit to repositories, give stars, and engage with the open-source community. Git Garden also reflects your most used programming language through visual cues in the environment, making your coding journey more interactive and fun!
 
