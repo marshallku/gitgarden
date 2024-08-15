@@ -38,7 +38,11 @@ fn register_objects() -> String {
     objects
 }
 
-pub async fn render_farm_service(user_name: &str, year: i32, state: AppState) -> String {
+pub async fn render_farm_service(
+    user_name: &str,
+    year: i32,
+    state: AppState,
+) -> Result<String, Box<dyn std::error::Error>> {
     let commits = get_daily_commits(&user_name, year).await.unwrap();
     let (start_date, end_date) = get_year_range(year).unwrap();
     let weeks = calculate_weeks(start_date, end_date);
@@ -205,12 +209,12 @@ async fn generate_svg(
     start_date: NaiveDate,
     weeks: usize,
     commits: HashMap<String, u32>,
-) -> String {
+) -> Result<String, Box<dyn std::error::Error>> {
     let width = weeks as u32 * (CELL_SIZE + CELL_SPACING) + GRID_LEFT_PADDING * 2;
     const HEIGHT: u32 = 465;
 
     let stats = get_stats(
-        &user_name,
+        user_name,
         format!("{}-01-01T00:00:00Z", year),
         format!("{}-12-31T23:59:59Z", year),
         state.token,
@@ -218,7 +222,11 @@ async fn generate_svg(
     .await;
 
     if stats.is_err() {
-        return String::new();
+        let error = &stats.err().unwrap()[0];
+        return Err(Box::new(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            error.message.clone(),
+        )));
     }
 
     let stats = stats.unwrap();
@@ -237,7 +245,7 @@ async fn generate_svg(
             .total_repositories_with_contributed_commits,
     );
 
-    format!(
+    Ok(format!(
         r##"
         <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -255,5 +263,5 @@ async fn generate_svg(
         </svg>
         "##,
         width, HEIGHT, width, HEIGHT, objects, grasses, trees, home, cells
-    )
+    ))
 }

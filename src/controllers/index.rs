@@ -26,12 +26,22 @@ pub async fn get(
     headers.insert("Pragma", "no-cache".parse().unwrap());
     headers.insert("Expires", "0".parse().unwrap());
 
-    let response = render_farm_service(
+    let rendered_svg = render_farm_service(
         &user_name,
         year.unwrap_or_else(|| chrono::Local::now().year()),
         state,
     )
     .await;
 
-    (StatusCode::OK, headers, response)
+    match rendered_svg {
+        Ok(svg) => (StatusCode::OK, headers, svg),
+        Err(e) => {
+            eprintln!("Error: {}", e);
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                headers,
+                "Internal Server Error".to_string(),
+            );
+        }
+    }
 }
