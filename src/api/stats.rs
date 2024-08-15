@@ -17,7 +17,6 @@ pub struct User {
     pub login: String,
     #[serde(rename = "contributionsCollection")]
     pub contributions_collection: ContributionsCollection,
-    pub repositories: Repositories,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -40,20 +39,6 @@ pub struct ContributionsCollection {
     pub total_repositories_with_contributed_pull_request_reviews: i32,
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct Repositories {
-    #[serde(rename = "totalCount")]
-    pub total_count: u32,
-    pub nodes: Vec<Repository>,
-}
-
-#[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct Repository {
-    pub name: String,
-    #[serde(rename = "pushedAt")]
-    pub pushed_at: String,
-}
-
 pub async fn get_stats(
     user_name: String,
     from: String,
@@ -72,13 +57,6 @@ pub async fn get_stats(
                 totalRepositoriesWithContributedIssues
                 totalRepositoriesWithContributedPullRequests
                 totalRepositoriesWithContributedPullRequestReviews
-            }
-            repositories(first: 100, orderBy: {field: PUSHED_AT, direction: DESC}) {
-                totalCount
-                nodes {
-                    name
-                    pushedAt
-                }
             }
         } 
     }
