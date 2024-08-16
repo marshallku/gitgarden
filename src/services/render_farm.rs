@@ -42,12 +42,6 @@ pub async fn render_farm_service(
     let mut farm = Farm::new(width, HEIGHT);
 
     farm.add_object(ContributionCells::new(year, start_date, weeks, commits));
-    farm.add_object(Home::new(user_name));
-    farm.add_object(Grasses::new(
-        user_name,
-        width,
-        &stats.contributions_collection,
-    ));
     farm.add_object(Trees::new(
         user_name,
         width,
@@ -55,6 +49,12 @@ pub async fn render_farm_service(
             .contributions_collection
             .total_repositories_with_contributed_commits,
     ));
+    farm.add_object(Grasses::new(
+        user_name,
+        width,
+        &stats.contributions_collection,
+    ));
+    farm.add_object(Home::new(user_name));
 
     Ok(farm.render())
 }
