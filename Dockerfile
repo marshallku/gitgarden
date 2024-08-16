@@ -25,6 +25,7 @@ FROM alpine:3.20.2
 WORKDIR /usr/local/bin
 
 COPY --from=builder /usr/src/gitgarden/target/release/gitgarden .
+COPY assets assets
 
 EXPOSE ${PORT}
 
