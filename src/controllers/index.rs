@@ -1,13 +1,14 @@
 use axum::{
     extract::{Query, State},
-    http::HeaderMap,
     response::IntoResponse,
 };
 use chrono::Datelike;
 use reqwest::StatusCode;
 use serde::Deserialize;
 
-use crate::{env::state::AppState, services::render_farm::render_farm_service};
+use crate::{
+    env::state::AppState, services::render_farm::render_farm_service, utils::http::get_cache_header,
+};
 
 #[derive(Deserialize)]
 pub struct Options {
@@ -19,12 +20,9 @@ pub async fn get(
     Query(Options { user_name, year }): Query<Options>,
     State(state): State<AppState>,
 ) -> impl IntoResponse {
-    let mut headers = HeaderMap::new();
+    let mut headers = get_cache_header("1h");
 
     headers.insert("Content-Type", "image/svg+xml".parse().unwrap());
-    headers.insert("Cache-Control", "no-cache".parse().unwrap());
-    headers.insert("Pragma", "no-cache".parse().unwrap());
-    headers.insert("Expires", "0".parse().unwrap());
 
     let rendered_svg = render_farm_service(
         &user_name,
