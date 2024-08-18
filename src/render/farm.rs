@@ -1,4 +1,4 @@
-use crate::utils::encode::encode_from_path;
+use crate::utils::{color::Rgb, encode::encode_from_path};
 
 use super::{objects::Objects, renderable::Renderable};
 
@@ -22,6 +22,7 @@ impl Farm {
     }
 
     pub fn render(&self) -> String {
+        let background_color = Rgb::from_hex("#a5c543").unwrap();
         let mut svg = format!(
             r##"
             <svg
@@ -31,13 +32,14 @@ impl Farm {
                 fill="none"
                 style="width: {}px; height: {}px;"
             >
-               <rect width="100%" height="100%" fill="#a5c543" />
+               <rect width="100%" height="100%" fill={}" />
                <defs>{}</defs>
             "##,
             self.width,
             self.height,
             self.width,
             self.height,
+            background_color.to_hex(),
             self.register_objects()
         );
 
