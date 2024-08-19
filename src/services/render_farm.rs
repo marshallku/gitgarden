@@ -53,11 +53,13 @@ pub async fn render_farm_service(
         stats
             .contributions_collection
             .total_repositories_with_contributed_commits,
+        &home.dead_zone,
     ));
     farm.add_object(Grasses::new(
         user_name,
         width,
         &stats.contributions_collection,
+        &home.dead_zone,
     ));
     farm.add_object(home);
 

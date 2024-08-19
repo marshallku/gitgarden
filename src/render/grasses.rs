@@ -1,4 +1,7 @@
-use crate::{api::stats::ContributionsCollection, utils::coordinate::must_generate_coordinate};
+use crate::{
+    api::stats::ContributionsCollection,
+    utils::coordinate::{must_generate_coordinate, Rectangle},
+};
 
 use super::{objects::Objects, renderable::Renderable};
 
@@ -6,14 +9,21 @@ pub struct Grasses {
     user_name: String,
     width: u32,
     contributions: ContributionsCollection,
+    dead_zone: Rectangle,
 }
 
 impl Grasses {
-    pub fn new(user_name: &str, width: u32, contributions: &ContributionsCollection) -> Self {
+    pub fn new(
+        user_name: &str,
+        width: u32,
+        contributions: &ContributionsCollection,
+        dead_zone: &Rectangle,
+    ) -> Self {
         Self {
             user_name: user_name.to_string(),
             width,
             contributions: contributions.clone(),
+            dead_zone: dead_zone.clone(),
         }
     }
 }
@@ -62,7 +72,7 @@ impl Renderable for Grasses {
                         &format!("{}-grass-{}-{}", self.user_name, index + 1, i),
                         (0.0, x_max),
                         (0.0, y_max),
-                        None,
+                        Some(&self.dead_zone),
                     );
                     format!(
                         r##"<use x="{}" y="{}" xlink:href="#{}" />"##,

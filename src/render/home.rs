@@ -1,24 +1,34 @@
 use crate::utils::{
-    coordinate::{must_generate_coordinate, Rectangle},
+    coordinate::{generate_coordinate, Rectangle},
     encode::encode_from_path,
 };
 
 use super::renderable::Renderable;
 
 pub struct Home {
-    pub coordinate: Rectangle,
+    coordinate: Rectangle,
+    pub dead_zone: Rectangle,
 }
 
 impl Home {
     pub fn new(user_name: &str) -> Self {
-        let (x, y) = must_generate_coordinate(&user_name, (80.0, 730.0), (25.0, 70.0), None);
+        let (x, y) = generate_coordinate(&user_name, (80.0, 730.0), (25.0, 70.0), None).unwrap();
+
+        let coordinate = Rectangle {
+            x1: x,
+            y1: y,
+            x2: x + 67.0,
+            y2: y + 152.0,
+        };
 
         Self {
-            coordinate: Rectangle {
-                x1: x,
-                y1: y,
-                x2: x + 67.0,
-                y2: y + 152.0,
+            coordinate: coordinate.clone(),
+            // Add object size to coordinate
+            dead_zone: Rectangle {
+                x1: coordinate.x1,
+                y1: coordinate.y1,
+                x2: coordinate.x2,
+                y2: coordinate.y2 + 89.0,
             },
         }
     }

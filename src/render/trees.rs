@@ -1,4 +1,4 @@
-use crate::utils::coordinate::must_generate_coordinate;
+use crate::utils::coordinate::{must_generate_coordinate, Rectangle};
 
 use super::{objects::Objects, renderable::Renderable};
 
@@ -6,14 +6,16 @@ pub struct Trees {
     user_name: String,
     width: u32,
     count: i32,
+    dead_zone: Rectangle,
 }
 
 impl Trees {
-    pub fn new(user_name: &str, width: u32, count: i32) -> Self {
+    pub fn new(user_name: &str, width: u32, count: i32, dead_zone: &Rectangle) -> Self {
         Self {
             user_name: user_name.to_string(),
             width,
             count,
+            dead_zone: dead_zone.clone(),
         }
     }
 }
@@ -27,7 +29,7 @@ impl Renderable for Trees {
                     &format!("{}-tree-{}", self.user_name, i),
                     (5.0, self.width as f64 - 50.0),
                     (5.0, 230.0),
-                    None,
+                    Some(&self.dead_zone),
                 )
             })
             .collect();
