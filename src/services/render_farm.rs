@@ -43,6 +43,8 @@ pub async fn render_farm_service(
     // length of key of commits / (365 / 2) * 100, upper bound 100
     let progress = (commits.len() as f32 / 182.5 * 100.0).min(100.0);
 
+    let home = Home::new(user_name);
+
     farm.set_progress(progress);
     farm.add_object(ContributionCells::new(year, start_date, weeks, commits));
     farm.add_object(Trees::new(
@@ -57,7 +59,7 @@ pub async fn render_farm_service(
         width,
         &stats.contributions_collection,
     ));
-    farm.add_object(Home::new(user_name));
+    farm.add_object(home);
 
     Ok(farm.render())
 }

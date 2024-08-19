@@ -1,4 +1,4 @@
-use crate::utils::coordinate::generate_coordinate;
+use crate::utils::coordinate::must_generate_coordinate;
 
 use super::{objects::Objects, renderable::Renderable};
 
@@ -23,26 +23,24 @@ impl Renderable for Trees {
         let mut trees = String::new();
         let mut coords: Vec<(f64, f64)> = (0..self.count)
             .map(|i| {
-                generate_coordinate(
+                must_generate_coordinate(
                     &format!("{}-tree-{}", self.user_name, i),
                     (5.0, self.width as f64 - 50.0),
                     (5.0, 230.0),
                     None,
                 )
-                .unwrap()
             })
             .collect();
 
         coords.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
 
         for (x, y) in coords {
-            let (tree_kind, _) = generate_coordinate(
+            let (tree_kind, _) = must_generate_coordinate(
                 &format!("{}-tree-kind-{}", self.user_name, x),
                 (1.0, 2.0),
                 (1.0, 2.0),
                 None,
-            )
-            .unwrap();
+            );
             let tree = match tree_kind as u32 {
                 1 => Objects::TreeOne,
                 _ => Objects::TreeTwo,

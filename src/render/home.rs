@@ -1,5 +1,5 @@
 use crate::utils::{
-    coordinate::{generate_coordinate, Rectangle},
+    coordinate::{must_generate_coordinate, Rectangle},
     encode::encode_from_path,
 };
 
@@ -11,7 +11,7 @@ pub struct Home {
 
 impl Home {
     pub fn new(user_name: &str) -> Self {
-        let (x, y) = generate_coordinate(&user_name, (80.0, 730.0), (25.0, 70.0), None).unwrap();
+        let (x, y) = must_generate_coordinate(&user_name, (80.0, 730.0), (25.0, 70.0), None);
 
         Self {
             coordinate: Rectangle {

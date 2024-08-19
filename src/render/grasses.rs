@@ -1,4 +1,4 @@
-use crate::{api::stats::ContributionsCollection, utils::coordinate::generate_coordinate};
+use crate::{api::stats::ContributionsCollection, utils::coordinate::must_generate_coordinate};
 
 use super::{objects::Objects, renderable::Renderable};
 
@@ -58,13 +58,12 @@ impl Renderable for Grasses {
             .enumerate()
             .flat_map(|(index, (grass_type, count))| {
                 (0..*count).map(move |i| {
-                    let (x, y) = generate_coordinate(
+                    let (x, y) = must_generate_coordinate(
                         &format!("{}-grass-{}-{}", self.user_name, index + 1, i),
                         (0.0, x_max),
                         (0.0, y_max),
                         None,
-                    )
-                    .unwrap();
+                    );
                     format!(
                         r##"<use x="{}" y="{}" xlink:href="#{}" />"##,
                         x,
