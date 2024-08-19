@@ -1,8 +1,8 @@
 #[derive(Debug, Clone)]
 pub struct Rgb {
-    red: u8,
-    green: u8,
-    blue: u8,
+    pub red: u8,
+    pub green: u8,
+    pub blue: u8,
 }
 
 impl Rgb {
@@ -24,5 +24,16 @@ impl Rgb {
 
     pub fn to_hex(&self) -> String {
         format!("#{:02X}{:02X}{:02X}", self.red, self.green, self.blue)
+    }
+
+    /// Interpolates between two RGB colors based on percentage.
+    pub fn interpolate(&self, color: &Rgb, percentage: f32) -> Self {
+        let ratio = percentage / 100.0;
+        let r = (self.red as f32 + (color.red as f32 - self.red as f32) * ratio).round() as u8;
+        let g =
+            (self.green as f32 + (color.green as f32 - self.green as f32) * ratio).round() as u8;
+        let b = (self.blue as f32 + (color.blue as f32 - self.blue as f32) * ratio).round() as u8;
+
+        Rgb::new(r, g, b)
     }
 }
