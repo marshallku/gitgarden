@@ -12,6 +12,22 @@ pub struct Rectangle {
     pub y2: f64,
 }
 
+pub fn must_generate_coordinate<T: Hash>(
+    key: T,
+    x_range: (f64, f64),
+    y_range: (f64, f64),
+    dead_zones: Option<&[Rectangle]>,
+) -> (f64, f64) {
+    if dead_zones.is_none() {
+        return generate_coordinate(&key, x_range, y_range, dead_zones).unwrap();
+    }
+
+    match generate_coordinate(&key, x_range, y_range, dead_zones) {
+        Some(coord) => coord,
+        None => generate_coordinate(&key, x_range, y_range, None).unwrap(),
+    }
+}
+
 pub fn generate_coordinate<T: Hash>(
     key: T,
     x_range: (f64, f64),
