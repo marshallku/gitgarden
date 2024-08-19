@@ -40,7 +40,10 @@ pub async fn render_farm_service(
     let stats = stats.unwrap();
 
     let mut farm = Farm::new(width, HEIGHT);
+    // length of key of commits / (365 / 2) * 100, upper bound 100
+    let progress = (commits.len() as f32 / 182.5 * 100.0).min(100.0);
 
+    farm.set_progress(progress);
     farm.add_object(ContributionCells::new(year, start_date, weeks, commits));
     farm.add_object(Trees::new(
         user_name,
