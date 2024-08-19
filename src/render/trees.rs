@@ -27,7 +27,9 @@ impl Renderable for Trees {
                     &format!("{}-tree-{}", self.user_name, i),
                     (5.0, self.width as f64 - 50.0),
                     (5.0, 230.0),
+                    None,
                 )
+                .unwrap()
             })
             .collect();
 
@@ -38,7 +40,9 @@ impl Renderable for Trees {
                 &format!("{}-tree-kind-{}", self.user_name, x),
                 (1.0, 2.0),
                 (1.0, 2.0),
-            );
+                None,
+            )
+            .unwrap();
             let tree = match tree_kind as u32 {
                 1 => Objects::TreeOne,
                 _ => Objects::TreeTwo,

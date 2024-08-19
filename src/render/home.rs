@@ -16,7 +16,8 @@ impl Home {
 
 impl Renderable for Home {
     fn render(&self) -> String {
-        let (x, y) = generate_coordinate(&self.user_name, (80.0, 730.0), (25.0, 70.0));
+        let (x, y) =
+            generate_coordinate(&self.user_name, (80.0, 730.0), (25.0, 70.0), None).unwrap();
         let home = encode_from_path("objects/home.png");
         let road = encode_from_path("objects/stone_road.png");
 

@@ -62,7 +62,9 @@ impl Renderable for Grasses {
                         &format!("{}-grass-{}-{}", self.user_name, index + 1, i),
                         (0.0, x_max),
                         (0.0, y_max),
-                    );
+                        None,
+                    )
+                    .unwrap();
                     format!(
                         r##"<use x="{}" y="{}" xlink:href="#{}" />"##,
                         x,
