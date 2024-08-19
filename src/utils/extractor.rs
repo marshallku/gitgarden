@@ -29,16 +29,27 @@ where
                 .map(|v| v.to_str().unwrap())
                 .unwrap_or("localhost"),
         );
-        let port = parts.uri.port_u16().unwrap_or(
-            parts
-                .headers
-                .get("x-forwarded-port")
-                .map(|v| v.to_str().unwrap())
-                .unwrap_or("48092")
-                .parse()
-                .unwrap(),
-        );
+        let port = if host.contains(':') {
+            "".to_string()
+        } else {
+            format!(
+                ":{}",
+                parts
+                    .uri
+                    .port_u16()
+                    .unwrap_or(
+                        parts
+                            .headers
+                            .get("x-forwarded-port")
+                            .map(|v| v.to_str().unwrap())
+                            .unwrap_or("80")
+                            .parse()
+                            .unwrap(),
+                    )
+                    .to_string()
+            )
+        };
 
-        Ok(ExtractFullOrigin(format!("{}://{}:{}", scheme, host, port)))
+        Ok(ExtractFullOrigin(format!("{}://{}{}", scheme, host, port)))
     }
 }
