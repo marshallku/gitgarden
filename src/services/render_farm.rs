@@ -13,7 +13,7 @@ pub async fn render_farm_service(
     user_name: &str,
     year: i32,
     state: AppState,
-) -> Result<(u32, u32, String), Box<dyn std::error::Error>> {
+) -> Result<String, Box<dyn std::error::Error>> {
     let commits = get_daily_commits(&user_name, year).await.unwrap();
     let (start_date, end_date) = get_year_range(year).unwrap();
     let weeks = calculate_weeks(start_date, end_date);
@@ -56,5 +56,5 @@ pub async fn render_farm_service(
     ));
     farm.add_object(Home::new(user_name));
 
-    Ok((width, HEIGHT, farm.render()))
+    Ok(farm.render())
 }

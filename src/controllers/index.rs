@@ -26,26 +26,26 @@ pub async fn get(
     let mut headers = get_cache_header("1h");
     let year = year.unwrap_or_else(|| chrono::Local::now().year());
 
-    headers.insert("Content-Type", "image/svg+xml".parse().unwrap());
-
     let rendered_svg = render_farm_service(&user_name, year, state).await;
 
     match rendered_svg {
         Ok(svg) => {
-            let (width, height, image) = svg;
-
-            headers.insert("Content-Length", image.len().to_string().parse().unwrap());
+            headers.insert("Content-Type", "image/svg+xml".parse().unwrap());
             headers.insert(
-                "og:image",
-                format!("{}/?user_name={}&year={}", origin, user_name, year)
+                "Accept-Ch",
+                "UA, UA-Mobile, Save-Data, RTT".parse().unwrap(),
+            );
+            headers.insert("Referrer-Policy", "same-origin".parse().unwrap());
+            headers.insert(
+                "Content-Disposition",
+                format!("inline; filename=\"{}-gitgarden-{}.svg\"", user_name, year)
                     .parse()
                     .unwrap(),
             );
-            headers.insert("og:image:type", "image/svg+xml".parse().unwrap());
-            headers.insert("og:image:width", width.to_string().parse().unwrap());
-            headers.insert("og:image:height", height.to_string().parse().unwrap());
+            headers.insert("Access-Control-Allow-Origin", origin.parse().unwrap());
+            headers.insert("X-Content-Type-Options", "nosniff".parse().unwrap());
 
-            (StatusCode::OK, headers, image)
+            (StatusCode::OK, headers, svg)
         }
         Err(e) => {
             eprintln!("Error: {}", e);

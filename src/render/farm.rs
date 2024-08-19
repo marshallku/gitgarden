@@ -32,7 +32,7 @@ impl Farm {
                 fill="none"
                 style="width: {}px; height: {}px;"
             >
-               <rect width="100%" height="100%" fill={}" />
+               <rect width="100%" height="100%" fill="{}" />
                <defs>{}</defs>
             "##,
             self.width,
