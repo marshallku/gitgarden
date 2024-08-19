@@ -2,7 +2,7 @@
 mod tests {
     use std::f64;
 
-    use crate::utils::coordinate::{generate_coordinate, is_in_rectangles, Rectangle};
+    use crate::utils::coordinate::{generate_coordinate, is_in_rectangle, Rectangle};
 
     #[test]
     fn test_random_generation() {
@@ -99,28 +99,20 @@ mod tests {
 
     #[test]
     fn test_dead_zone_exclusion() {
-        let dead_zones = vec![
-            Rectangle {
-                x1: 0.0,
-                y1: 0.0,
-                x2: 0.5,
-                y2: 0.5,
-            },
-            Rectangle {
-                x1: 0.7,
-                y1: 0.7,
-                x2: 1.0,
-                y2: 1.0,
-            },
-        ];
+        let dead_zone = Rectangle {
+            x1: 0.0,
+            y1: 0.0,
+            x2: 0.5,
+            y2: 0.5,
+        };
 
         for _ in 0..100 {
             // Run multiple times to ensure consistency
             if let Some((x, y)) =
-                generate_coordinate("test", (0.0, 1.0), (0.0, 1.0), Some(&dead_zones))
+                generate_coordinate("test", (0.0, 1.0), (0.0, 1.0), Some(&dead_zone))
             {
                 assert!(
-                    !is_in_rectangles(x, y, &dead_zones),
+                    !is_in_rectangle(x, y, &dead_zone),
                     "Generated coordinate ({}, {}) should not be in dead zones",
                     x,
                     y
@@ -133,14 +125,14 @@ mod tests {
 
     #[test]
     fn test_dead_zone_covering_entire_range() {
-        let dead_zones = vec![Rectangle {
+        let dead_zone = Rectangle {
             x1: 0.0,
             y1: 0.0,
             x2: 1.0,
             y2: 1.0,
-        }];
+        };
 
-        let result = generate_coordinate("test", (0.0, 1.0), (0.0, 1.0), Some(&dead_zones));
+        let result = generate_coordinate("test", (0.0, 1.0), (0.0, 1.0), Some(&dead_zone));
         assert!(
             result.is_none(),
             "Should return None when dead zone covers entire range"
@@ -149,14 +141,14 @@ mod tests {
 
     #[test]
     fn test_dead_zone_with_small_valid_area() {
-        let dead_zones = vec![Rectangle {
+        let dead_zone = Rectangle {
             x1: 0.0,
             y1: 0.0,
             x2: 0.99,
             y2: 0.99,
-        }];
+        };
 
-        let result = generate_coordinate("test", (0.0, 1.0), (0.0, 1.0), Some(&dead_zones));
+        let result = generate_coordinate("test", (0.0, 1.0), (0.0, 1.0), Some(&dead_zone));
         assert!(
             result.is_some(),
             "Should be able to find a valid coordinate in a small area"
@@ -166,46 +158,6 @@ mod tests {
                 x > 0.99 || y > 0.99,
                 "Coordinate should be in the small valid area"
             );
-        }
-    }
-
-    #[test]
-    fn test_multiple_dead_zones() {
-        let dead_zones = vec![
-            Rectangle {
-                x1: 0.0,
-                y1: 0.0,
-                x2: 0.3,
-                y2: 0.3,
-            },
-            Rectangle {
-                x1: 0.4,
-                y1: 0.4,
-                x2: 0.6,
-                y2: 0.6,
-            },
-            Rectangle {
-                x1: 0.7,
-                y1: 0.7,
-                x2: 1.0,
-                y2: 1.0,
-            },
-        ];
-
-        for _ in 0..100 {
-            // Run multiple times to ensure consistency
-            if let Some((x, y)) =
-                generate_coordinate("test", (0.0, 1.0), (0.0, 1.0), Some(&dead_zones))
-            {
-                assert!(
-                    !is_in_rectangles(x, y, &dead_zones),
-                    "Generated coordinate ({}, {}) should not be in any dead zone",
-                    x,
-                    y
-                );
-            } else {
-                panic!("Failed to generate coordinate outside dead zones");
-            }
         }
     }
 
@@ -226,17 +178,19 @@ mod tests {
             },
         ];
 
-        for _ in 0..100 {
-            // Run multiple times to ensure consistency
-            if let Some((x, _y)) =
-                generate_coordinate("test", (0.0, 1.0), (0.0, 1.0), Some(&dead_zones))
-            {
-                assert!(
-                    x > 0.1 && x < 0.9,
-                    "X coordinate should be between dead zones"
-                );
-            } else {
-                panic!("Failed to generate coordinate outside dead zones");
+        for dead_zone in dead_zones {
+            for _ in 0..100 {
+                // Run multiple times to ensure consistency
+                if let Some((x, _y)) =
+                    generate_coordinate("test", (0.0, 1.0), (0.0, 1.0), Some(&dead_zone))
+                {
+                    assert!(
+                        x > 0.1 && x < 0.9,
+                        "X coordinate should be between dead zones"
+                    );
+                } else {
+                    panic!("Failed to generate coordinate outside dead zones");
+                }
             }
         }
     }
