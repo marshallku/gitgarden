@@ -7,7 +7,9 @@ use reqwest::StatusCode;
 use serde::Deserialize;
 
 use crate::{
-    env::state::AppState, services::render_farm::render_farm_service, utils::http::get_cache_header,
+    env::state::AppState,
+    services::render_farm::render_farm_service,
+    utils::{extractor::ExtractFullOrigin, http::get_cache_header},
 };
 
 #[derive(Deserialize)]
@@ -19,20 +21,32 @@ pub struct Options {
 pub async fn get(
     Query(Options { user_name, year }): Query<Options>,
     State(state): State<AppState>,
+    ExtractFullOrigin(origin): ExtractFullOrigin,
 ) -> impl IntoResponse {
     let mut headers = get_cache_header("1h");
+    let year = year.unwrap_or_else(|| chrono::Local::now().year());
 
     headers.insert("Content-Type", "image/svg+xml".parse().unwrap());
 
-    let rendered_svg = render_farm_service(
-        &user_name,
-        year.unwrap_or_else(|| chrono::Local::now().year()),
-        state,
-    )
-    .await;
+    let rendered_svg = render_farm_service(&user_name, year, state).await;
 
     match rendered_svg {
-        Ok(svg) => (StatusCode::OK, headers, svg),
+        Ok(svg) => {
+            let (width, height, image) = svg;
+
+            headers.insert("Content-Length", image.len().to_string().parse().unwrap());
+            headers.insert(
+                "og:image",
+                format!("{}/?user_name={}&year={}", origin, user_name, year)
+                    .parse()
+                    .unwrap(),
+            );
+            headers.insert("og:image:type", "image/svg+xml".parse().unwrap());
+            headers.insert("og:image:width", width.to_string().parse().unwrap());
+            headers.insert("og:image:height", height.to_string().parse().unwrap());
+
+            (StatusCode::OK, headers, image)
+        }
         Err(e) => {
             eprintln!("Error: {}", e);
             return (
