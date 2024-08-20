@@ -1,4 +1,4 @@
-# Git Garden 🌱
+# GitGarden
 
 ![gitgarden](https://github.com/user-attachments/assets/051c0c51-f257-4163-9109-ec21cdebfc9e)
 
@@ -7,78 +7,100 @@ Git Garden is a creative and engaging visualization tool that transforms your Gi
 ## Table of Contents
 
 - [Features](#features)
-- [How It Works](#how-it-works)
-- [Installation](#installation)
 - [Usage](#usage)
+- [Self-Hosting](#self-hosting)
+- [Local Development](#local-development)
 - [Contributing](#contributing)
 - [License](#license)
 
 ## Features
 
-- **Interactive Garden**: Your GitHub activity is represented by a dynamic garden where trees, flowers, and other elements grow and change.
-- **Gamification**: Earn trees by giving stars to repositories, and grow flowers by committing to your projects.
-- **Real-Time Updates**: Your garden evolves in real-time based on your GitHub activity.
-- **Language Visualization (planned)**: The most used programming language is visually reflected in the garden through color schemes, decorations, and special effects.
-- **Customizable Themes (planned)**: Different themes are available based on the programming languages you use the most.
-
-## How It Works
-
-1. **GitHub Integration**: Git Garden connects to your GitHub account to track your contributions, repositories, stars, and more.
-2. **Visualization**: Based on your activities, the garden elements grow and change. Each element (like a tree or flower) represents a different kind of activity.
-3. **Language Representation (planned)**: The most used programming language in your repositories influences the appearance of your garden—whether through colors, shapes, or seasonal themes.
-
-### Example
-
-- **Commit More, Grow More**: Every time you commit to a project, a new flower blooms in your garden.
-- **Star Repositories, Grow Trees**: Give stars to other repositories, and watch trees sprout up in your garden.
-- **Language Influence (planned)**: If JavaScript is your most used language, the garden might show yellow flowers, while Python could bring a green theme.
-
-## Installation
-
-### Prerequisites
-
-- [Rust](https://www.rust-lang.org/)
-- [Docker](https://www.docker.com/)
-- [GitHub API Token](https://github.com/settings/tokens) for accessing GitHub data
-
-### Clone the Repository
-
-```bash
-git clone https://github.com/your-username/git-garden.git
-cd git-garden
-```
-
-### Set Up Environment Variables
-
-Create a `.env` file in the root of your project and add your GitHub API token:
-
-```bash
-GITHUB_TOKEN=your_github_api_token_here
-```
-
-### Run the Application
-
-```bash
-cargo run
-# or
-docker compose up
-```
+- Visualizes GitHub contributions as a farm
+- Customizable for any GitHub user and specific year
+- Dynamically generates SVG images
+- Easy to integrate into GitHub profile READMEs
 
 ## Usage
 
-1. **Connect Your GitHub Account**: Log in with your GitHub account to start visualizing your activity.
-2. **Watch Your Garden Grow**: As you code, commit, and contribute, return to your garden to see how it evolves.
-3. **Explore Different Themes (planned)**: Use the settings to explore different themes based on your most used programming languages.
+To add GitGarden to your GitHub profile, simply insert the following markdown into your README:
+
+```markdown
+[![GitGarden](https://gitgarden.marshallku.dev/?user_name=YOUR_GITHUB_USERNAME)](https://github.com/marshallku/gitgarden)
+```
+
+Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username.
+
+You can also customize the year by adding the `year` query parameter:
+
+```markdown
+[![GitGarden](https://gitgarden.marshallku.dev/?user_name=YOUR_GITHUB_USERNAME&year=2023)](https://github.com/marshallku/gitgarden)
+```
+
+## Self-Hosting
+
+GitGarden can be self-hosted using Docker. You have two options:
+
+### Option 1: Using the pre-built image
+
+1. Pull the latest image from GitHub Container Registry:
+
+   ```bash
+   docker pull ghcr.io/marshallku/gitgarden:latest
+   ```
+
+2. Copy the example environment file:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+3. Edit the `.env` file with your GitHub token and other necessary configurations.
+
+4. Run the container:
+
+   ```bash
+   docker run -p 18080:18080 --env-file .env ghcr.io/marshallku/gitgarden:latest
+   ```
+
+### Option 2: Building from source
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/marshallku/gitgarden.git
+   cd gitgarden
+   ```
+
+2. Copy the example environment file:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+3. Edit the `.env` file with your GitHub token and other necessary configurations.
+
+4. Build and run the Docker container:
+
+   ```bash
+   docker build -t gitgarden .
+   docker run -p 18080:18080 gitgarden
+   ```
+
+Both options will make GitGarden available at `http://localhost:18080`.
+
+## Local Development
+
+To set up GitGarden for local development:
+
+1. Ensure you have Rust and Cargo installed.
+2. Clone the repository and navigate to the project directory.
+3. Copy `.env.example` to `.env` and fill in your GitHub token.
+4. Run `cargo build` to compile the project.
+5. Use `cargo run` to start the server locally.
 
 ## Contributing
 
-Contributions are welcome! To contribute:
-
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feat/your-feature-name`).
-3. Commit your changes (`git commit -m 'Add your feature'`).
-4. Push to the branch (`git push origin feat/your-feature-name`).
-5. Open a pull request.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
