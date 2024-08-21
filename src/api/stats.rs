@@ -47,6 +47,53 @@ pub struct ContributionsCollection {
     pub total_repositories_with_contributed_pull_requests: i32,
     #[serde(rename = "totalRepositoriesWithContributedPullRequestReviews")]
     pub total_repositories_with_contributed_pull_request_reviews: i32,
+    #[serde(rename = "commitContributionsByRepository")]
+    pub commit_contributions_by_repository: Vec<CommitContributionsByRepository>,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct CommitContributionsByRepository {
+    pub repository: Repository,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct Repository {
+    #[serde(rename = "defaultBranchRef")]
+    pub default_branch_ref: Option<DefaultBranchRef>,
+    pub name: String,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct DefaultBranchRef {
+    pub target: Target,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct Target {
+    pub history: History,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct History {
+    pub edges: Vec<Edge>,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct Edge {
+    pub node: Node,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct Node {
+    pub message: String,
+    pub author: Author,
+    #[serde(rename = "committedDate")]
+    pub committed_date: String,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct Author {
+    pub email: String,
 }
 
 pub async fn get_user_id(user_name: &str, token: &str) -> Result<String, Vec<GithubGraphQLError>> {
@@ -100,8 +147,15 @@ pub async fn get_stats(
     to: String,
     token: String,
 ) -> Result<User, Vec<GithubGraphQLError>> {
+    let user_id = match get_user_id(user_name, &token).await {
+        Ok(user_id) => user_id,
+        Err(errors) => {
+            return Err(errors);
+        }
+    };
+
     let query = r#"
-    query($login: String!, $from: DateTime!, $to: DateTime!) {
+    query($login: String!, $userId: ID!, $from: DateTime!, $to: DateTime!, $since: GitTimestamp!, $until: GitTimestamp!) {
         user(login: $login) {
             login contributionsCollection(from: $from, to: $to) {
                 totalCommitContributions
@@ -112,6 +166,28 @@ pub async fn get_stats(
                 totalRepositoriesWithContributedIssues
                 totalRepositoriesWithContributedPullRequests
                 totalRepositoriesWithContributedPullRequestReviews
+                commitContributionsByRepository(maxRepositories:50) {
+                repository {
+                    defaultBranchRef {
+                        target {
+                            ... on Commit {
+                                history(first: 50, since: $since, until: $until, author:{ id: $userId }) {
+                                        edges {
+                                            node {
+                                                message
+                                                author {
+                                                    email
+                                                }
+                                                committedDate
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        name
+                    }
+                }
             }
         } 
     }
@@ -124,6 +200,9 @@ pub async fn get_stats(
             "login": user_name,
             "from": from,
             "to": to,
+            "since": from,
+            "until": to,
+            "userId": user_id,
         }
     });
 
