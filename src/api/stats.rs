@@ -7,6 +7,16 @@ use crate::utils::github::github_graphql_request;
 
 use super::structures::{GithubGraphQLError, GithubGraphQLResponse};
 
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct UserIdData {
+    pub user: Option<UserId>,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct UserId {
+    pub id: String,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Data {
     pub user: Option<User>,
@@ -37,6 +47,51 @@ pub struct ContributionsCollection {
     pub total_repositories_with_contributed_pull_requests: i32,
     #[serde(rename = "totalRepositoriesWithContributedPullRequestReviews")]
     pub total_repositories_with_contributed_pull_request_reviews: i32,
+}
+
+pub async fn get_user_id(user_name: &str, token: &str) -> Result<String, Vec<GithubGraphQLError>> {
+    let query = r#"
+    query($login: String!) {
+        user(login: $login) {
+            id
+        }
+    }
+    "#;
+
+    let headers: HashMap<&str, &str> = HashMap::new();
+
+    let data = json!({
+        "variables": {
+            "login": user_name,
+        }
+    });
+
+    let response = match github_graphql_request(query, &headers, data, token).await {
+        Ok(response) => response,
+        Err(error) => {
+            println!("Error: {:?}", error);
+            return Err(vec![GithubGraphQLError {
+                error_type: "RequestError".to_string(),
+                locations: vec![],
+                message: error.to_string(),
+                path: vec![],
+            }]);
+        }
+    };
+
+    let response: GithubGraphQLResponse<UserIdData> = serde_json::from_value(response).unwrap();
+
+    match response {
+        GithubGraphQLResponse {
+            data: Some(data),
+            errors: None,
+        } => Ok(data.user.unwrap().id),
+        GithubGraphQLResponse {
+            data: None,
+            errors: Some(errors),
+        } => Err(errors),
+        _ => panic!("Unexpected response"),
+    }
 }
 
 pub async fn get_stats(
