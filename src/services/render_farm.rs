@@ -1,5 +1,12 @@
+use std::collections::HashMap;
+
+use chrono::{DateTime, Timelike, Utc};
+
 use crate::{
-    api::{contributions::get_daily_commits, stats::get_stats},
+    api::{
+        contributions::get_daily_commits,
+        stats::{get_stats, ContributionsCollection},
+    },
     constants::render::{CELL_SIZE, CELL_SPACING, GRID_LEFT_PADDING},
     env::state::AppState,
     render::{
@@ -8,6 +15,48 @@ use crate::{
     },
     utils::date::{calculate_weeks, get_year_range},
 };
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+enum TimeRange {
+    Dawn,
+    Day,
+    Night,
+}
+
+fn calculate_most_frequent_commit_time(
+    contributions: &ContributionsCollection,
+) -> Result<TimeRange, Box<dyn std::error::Error>> {
+    let mut time_ranges = HashMap::new();
+
+    for repo in &contributions.commit_contributions_by_repository {
+        if let Some(ref branch) = repo.repository.default_branch_ref {
+            for edge in &branch.target.history.edges {
+                if let Ok(date) = DateTime::parse_from_rfc3339(&edge.node.committed_date) {
+                    let hour = date.with_timezone(&Utc).hour();
+                    let range = match hour {
+                        4..=7 => TimeRange::Dawn,
+                        8..=18 => TimeRange::Day,
+                        _ => TimeRange::Night,
+                    };
+                    *time_ranges.entry(range).or_insert(0) += 1;
+                }
+            }
+        }
+    }
+
+    let range = time_ranges
+        .into_iter()
+        .max_by_key(|&(_, count)| count)
+        .map(|(range, _)| range);
+
+    match range {
+        Some(range) => Ok(range),
+        None => Err(Box::new(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "No commits found.",
+        ))),
+    }
+}
 
 pub async fn render_farm_service(
     user_name: &str,
@@ -23,9 +72,9 @@ pub async fn render_farm_service(
 
     let stats = get_stats(
         user_name,
-        format!("{}-01-01T00:00:00Z", year),
-        format!("{}-12-31T23:59:59Z", year),
-        state.token,
+        &format!("{}-01-01T00:00:00Z", year),
+        &format!("{}-12-31T23:59:59Z", year),
+        &state.token,
     )
     .await;
 
@@ -44,6 +93,10 @@ pub async fn render_farm_service(
     let progress = (commits.len() as f32 / 182.5 * 100.0).min(100.0);
 
     let home = Home::new(user_name);
+
+    let time = calculate_most_frequent_commit_time(&stats.contributions_collection)?;
+
+    println!("Most frequent commit time: {:?}", time);
 
     farm.set_progress(progress);
     farm.add_object(ContributionCells::new(year, start_date, weeks, commits));
