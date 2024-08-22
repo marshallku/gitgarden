@@ -1,16 +1,29 @@
-use scraper::{Html, Selector};
 use std::collections::HashMap;
+use tl::{parse, ParserOptions};
 
 fn parse_commit_from_string(
     data: &str,
 ) -> Result<HashMap<String, u32>, Box<dyn std::error::Error>> {
     let mut commits_by_day = HashMap::new();
-    let document = Html::parse_document(data);
-    let td_selector = Selector::parse("td").unwrap();
+    let document = parse(data, ParserOptions::default()).unwrap();
+    let nodes = document
+        .nodes()
+        .iter()
+        .filter(|node| node.as_tag().map_or(false, |tag| tag.name() == "td"));
 
-    for td in document.select(&td_selector) {
-        let date = td.value().attr("data-date");
-        let level = td.value().attr("data-level");
+    for td in nodes {
+        let td = td.as_tag().unwrap();
+
+        let attributes = td.attributes();
+
+        let date = attributes
+            .get("data-date")
+            .flatten()
+            .and_then(|date| date.try_as_utf8_str());
+        let level = attributes
+            .get("data-level")
+            .flatten()
+            .and_then(|level| level.try_as_utf8_str());
 
         match (date, level) {
             (Some(date), Some(level)) => {
