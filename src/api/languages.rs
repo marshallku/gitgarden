@@ -139,7 +139,7 @@ pub async fn get_most_used_languages(
     let calculated_result = language_totals
         .iter()
         .map(|(name, &size)| {
-            let percentage = (size as f32 / total_size as f32) * 100.0;
+            let percentage = (size / total_size) as f32 * 100.0;
             let color = nodes
                 .iter()
                 .find_map(|repo| {
