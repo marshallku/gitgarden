@@ -72,9 +72,9 @@ pub async fn render_farm_service(
 
     let stats = get_stats(
         user_name,
-        &format!("{}-01-01T00:00:00Z", year),
-        &format!("{}-12-31T23:59:59Z", year),
-        &state.token,
+        format!("{}-01-01T00:00:00Z", year),
+        format!("{}-12-31T23:59:59Z", year),
+        state.token,
     )
     .await;
 
