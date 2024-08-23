@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use chrono::{DateTime, Timelike, Utc};
+use tokio::task;
 
 use crate::{
     api::{
@@ -63,30 +64,43 @@ pub async fn render_farm_service(
     year: i32,
     state: AppState,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    let commits = get_daily_commits(&user_name, year).await.unwrap();
+    let commits = task::spawn({
+        let user_name = user_name.to_string();
+        let year = year;
+
+        async move { get_daily_commits(&user_name, year).await.unwrap() }
+    });
     let (start_date, end_date) = get_year_range(year).unwrap();
     let weeks = calculate_weeks(start_date, end_date);
 
     let width = weeks as u32 * (CELL_SIZE + CELL_SPACING) + GRID_LEFT_PADDING * 2;
     const HEIGHT: u32 = 465;
 
-    let stats = get_stats(
-        user_name,
-        format!("{}-01-01T00:00:00Z", year),
-        format!("{}-12-31T23:59:59Z", year),
-        state.token,
-    )
-    .await;
+    let stats = task::spawn({
+        let user_name = user_name.to_string();
+        let year = year;
 
-    if stats.is_err() {
-        let error = &stats.err().unwrap()[0];
-        return Err(Box::new(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            error.message.clone(),
-        )));
-    }
+        async move {
+            get_stats(
+                &user_name,
+                format!("{}-01-01T00:00:00Z", year),
+                format!("{}-12-31T23:59:59Z", year),
+                state.token,
+            )
+            .await
+        }
+    });
 
-    let stats = stats.unwrap();
+    let commits = commits.await?;
+    let stats = match stats.await? {
+        Ok(stats) => stats,
+        Err(errors) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("{:?}", errors),
+            )))
+        }
+    };
 
     let mut farm = Farm::new(width, HEIGHT);
     // length of key of commits / (365 / 2) * 100, upper bound 100
