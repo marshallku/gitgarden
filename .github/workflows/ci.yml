@@ -88,11 +88,15 @@ jobs:
               uses: docker/build-push-action@v6
               with:
                   context: .
-                  push: ${{ github.event_name != 'pull_request' }}
+                  push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
                   tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number}},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
                   labels: ${{ steps.meta.outputs.labels }}
                   cache-from: type=local,src=/tmp/.buildx-cache
                   cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+            - name: Move cache
+              run: |
+                  rm -rf /tmp/.buildx-cache
+                  mv /tmp/.buildx-cache-new /tmp/.buildx-cache
     send-notification:
         needs: [check-spell, check-format, build, test, docker]
         if: ${{ failure() }}
