@@ -39,24 +39,21 @@ fn calculate_most_frequent_commit_time(
                         8..=18 => TimeRange::Day,
                         _ => TimeRange::Night,
                     };
-                    *time_ranges.entry(range).or_insert(0) += 1;
+
+                    time_ranges
+                        .entry(range)
+                        .and_modify(|count| *count += 1)
+                        .or_insert(1);
                 }
             }
         }
     }
 
-    let range = time_ranges
+    time_ranges
         .into_iter()
         .max_by_key(|&(_, count)| count)
-        .map(|(range, _)| range);
-
-    match range {
-        Some(range) => Ok(range),
-        None => Err(Box::new(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            "No commits found.",
-        ))),
-    }
+        .map(|(range, _)| range)
+        .ok_or_else(|| "No commits found.".into())
 }
 
 pub async fn render_farm_service(
