@@ -71,7 +71,7 @@ impl Objects {
     }
 
     pub fn iter() -> impl Iterator<Item = Objects> {
-        let objects = [
+        [
             Objects::FlowerOne,
             Objects::FlowerTwo,
             Objects::FlowerThree,
@@ -85,10 +85,7 @@ impl Objects {
             Objects::GrassFive,
             Objects::GrassSix,
             Objects::Dirt,
-        ];
-
-        assert_eq!(objects.len(), Objects::Dirt as usize + 1);
-
-        objects.into_iter()
+        ]
+        .into_iter()
     }
 }

@@ -1,3 +1,5 @@
+mod __tests__;
+
 pub mod contribution_cells;
 pub mod farm;
 pub mod grasses;
