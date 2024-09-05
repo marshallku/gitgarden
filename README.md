@@ -1,5 +1,16 @@
 # GitGarden
 
+[![CI](https://github.com/marshallku/gitgarden/actions/workflows/ci.yml/badge.svg)](https://github.com/marshallku/gitgarden/actions/workflows/ci.yml)
+
+![Quality Gate Status](https://badge.marshallku.dev?metric=alert_status&project=marshallku_gitgarden_f49379dd-a35e-4417-9652-87068a9a0bed)
+![Bugs](https://badge.marshallku.dev?metric=bugs&project=marshallku_gitgarden_f49379dd-a35e-4417-9652-87068a9a0bed)
+![Code Smells](https://badge.marshallku.dev?metric=code_smells&project=marshallku_gitgarden_f49379dd-a35e-4417-9652-87068a9a0bed)
+![Maintainability Rating](https://badge.marshallku.dev?metric=sqale_rating&project=marshallku_gitgarden_f49379dd-a35e-4417-9652-87068a9a0bed)
+![Reliability Rating](https://badge.marshallku.dev?metric=reliability_rating&project=marshallku_gitgarden_f49379dd-a35e-4417-9652-87068a9a0bed)
+![Security Rating](https://badge.marshallku.dev?metric=security_rating&project=marshallku_gitgarden_f49379dd-a35e-4417-9652-87068a9a0bed)
+![Vulnerabilities](https://badge.marshallku.dev?metric=vulnerabilities&project=marshallku_gitgarden_f49379dd-a35e-4417-9652-87068a9a0bed)
+![Coverage](https://badge.marshallku.dev?metric=coverage&project=marshallku_gitgarden_f49379dd-a35e-4417-9652-87068a9a0bed)
+
 ![gitgarden](https://github.com/user-attachments/assets/051c0c51-f257-4163-9109-ec21cdebfc9e)
 
 Git Garden is a creative and engaging visualization tool that transforms your GitHub activity into a beautiful garden. Each element in your garden—whether it's a tree, flower, or decoration—represents different aspects of your contributions on GitHub. Watch your garden grow as you commit to repositories, give stars, and engage with the open-source community. Git Garden also reflects your most used programming language through visual cues in the environment, making your coding journey more interactive and fun!
