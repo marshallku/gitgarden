@@ -110,20 +110,18 @@ pub async fn get_most_used_languages(
         GithubGraphQLResponse {
             data: Some(data),
             errors: None,
-        } => Ok(data.user.unwrap()),
-        _ => Err(vec![GithubGraphQLError {
-            error_type: "ResponseError".to_string(),
-            locations: vec![],
-            message: "Unexpected response".to_string(),
-            path: vec![],
-        }]),
+        } => data.user.unwrap(),
+        _ => {
+            return Err(vec![GithubGraphQLError {
+                error_type: "ResponseError".to_string(),
+                locations: vec![],
+                message: "Unexpected response".to_string(),
+                path: vec![],
+            }])
+        }
     };
 
-    if response.is_err() {
-        return Err(response.unwrap_err());
-    }
-
-    let nodes = response.unwrap().repositories.nodes;
+    let nodes = response.repositories.nodes;
     let mut language_totals: HashMap<String, i32> = HashMap::new();
     let mut total_size = 0;
 
