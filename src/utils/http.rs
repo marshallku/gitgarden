@@ -8,10 +8,7 @@ use crate::constants::date::{
 
 pub fn get_cache_header(age: &str) -> HeaderMap {
     let mut headers = HeaderMap::new();
-    let parsed_age = match parse_age(&age) {
-        Ok(age) => age,
-        Err(_) => 0,
-    };
+    let parsed_age = parse_age(&age).unwrap_or_default();
 
     let cache_age = if parsed_age == 0 {
         "no-cache".to_string()
