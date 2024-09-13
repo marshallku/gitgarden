@@ -49,11 +49,11 @@ pub async fn get(
         }
         Err(e) => {
             eprintln!("Error: {}", e);
-            return (
+            (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 headers,
                 "Internal Server Error".to_string(),
-            );
+            )
         }
     }
 }
