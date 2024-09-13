@@ -8,10 +8,13 @@ pub fn encode_from_path(path: &str) -> String {
     let file = std::fs::read(file_path.clone());
 
     if let Err(e) = file {
-        eprintln!("Error reading file: {}, {:?}", file_path.to_str().unwrap_or(path), e);
+        eprintln!(
+            "Error reading file: {}, {:?}",
+            file_path.to_str().unwrap_or(path),
+            e
+        );
         String::new()
     } else {
-        let encoded = general_purpose::STANDARD_NO_PAD.encode(file.unwrap());
-        encoded
+        general_purpose::STANDARD_NO_PAD.encode(file.unwrap())
     }
 }
