@@ -63,7 +63,6 @@ pub async fn render_farm_service(
 ) -> Result<String, Box<dyn std::error::Error>> {
     let commits = task::spawn({
         let user_name = user_name.to_string();
-        let year = year;
 
         async move { get_daily_commits(&user_name, year).await.unwrap() }
     });
@@ -75,7 +74,6 @@ pub async fn render_farm_service(
 
     let stats = task::spawn({
         let user_name = user_name.to_string();
-        let year = year;
 
         async move {
             get_stats(
