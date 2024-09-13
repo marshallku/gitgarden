@@ -41,4 +41,10 @@ mod tests {
         assert_eq!(parse_age("-1s"), Err("Invalid number"));
         assert_eq!(parse_age("18446744073709551616s"), Err("Invalid number"));
     }
+
+    #[test]
+    fn test_unwrapped_value() {
+        assert_eq!(parse_age("30s").unwrap(), 30);
+        assert_eq!(parse_age("30x").unwrap_or_default(), 0);
+    }
 }
