@@ -26,7 +26,7 @@ impl Renderable for Trees {
         let mut coords: Vec<(f64, f64)> = (0..self.count)
             .map(|i| {
                 must_generate_coordinate(
-                    &format!("{}-tree-{}", self.user_name, i),
+                    format!("{}-tree-{}", self.user_name, i),
                     (5.0, self.width as f64 - 50.0),
                     (5.0, 230.0),
                     Some(&self.dead_zone),
@@ -38,7 +38,7 @@ impl Renderable for Trees {
 
         for (x, y) in coords {
             let (tree_kind, _) = must_generate_coordinate(
-                &format!("{}-tree-kind-{}", self.user_name, x),
+                format!("{}-tree-kind-{}", self.user_name, x),
                 (1.0, 2.0),
                 (1.0, 2.0),
                 None,
