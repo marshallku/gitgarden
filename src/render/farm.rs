@@ -1,3 +1,5 @@
+use std::fmt::Write;
+
 use crate::utils::{color::Rgb, encode::encode_from_path};
 
 use super::{objects::Objects, renderable::Renderable};
@@ -62,18 +64,22 @@ impl Farm {
     }
 
     fn register_objects(&self) -> String {
-        Objects::iter()
-            .map(|object| {
-                let path = object.to_path();
-                let encoded = encode_from_path(&path);
-                format!(
-                    r#"<image id="{}" width="{}" height="{}" xlink:href="data:image/png;base64,{}" />"#,
-                    object.to_string(),
-                    object.to_size().0,
-                    object.to_size().1,
-                    encoded
-                )
-            })
-            .collect()
+        Objects::iter().fold(String::new(), |mut acc, object| {
+            let path = object.to_path();
+            let encoded = encode_from_path(&path);
+            let (width, height) = object.to_size();
+
+            write!(
+                acc,
+                r#"<image id="{}" width="{}" height="{}" xlink:href="data:image/png;base64,{}" />"#,
+                object.to_string(),
+                width,
+                height,
+                encoded
+            )
+            .expect("Writing to string should not fail");
+
+            acc
+        })
     }
 }
