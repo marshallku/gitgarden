@@ -69,7 +69,7 @@ impl Renderable for Grasses {
             .flat_map(|(index, (grass_type, count))| {
                 (0..*count).map(move |i| {
                     let (x, y) = must_generate_coordinate(
-                        &format!("{}-grass-{}-{}", self.user_name, index + 1, i),
+                        format!("{}-grass-{}-{}", self.user_name, index + 1, i),
                         (0.0, x_max),
                         (0.0, y_max),
                         Some(&self.dead_zone),

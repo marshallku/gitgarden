@@ -12,7 +12,7 @@ pub struct Home {
 
 impl Home {
     pub fn new(user_name: &str) -> Self {
-        let (x, y) = generate_coordinate(&user_name, (80.0, 730.0), (25.0, 70.0), None).unwrap();
+        let (x, y) = generate_coordinate(user_name, (80.0, 730.0), (25.0, 70.0), None).unwrap();
 
         let coordinate = Rectangle {
             x1: x,
