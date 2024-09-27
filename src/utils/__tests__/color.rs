@@ -28,7 +28,7 @@ mod tests {
     #[test]
     fn test_to_hex() {
         let color = Rgb::new(255, 128, 64);
-        assert_eq!(color.to_hex(), "#FF8040");
+        assert_eq!(format!("{}", color), "#FF8040");
     }
 
     #[test]

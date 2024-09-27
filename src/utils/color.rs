@@ -1,3 +1,5 @@
+use std::fmt::{self, Display, Formatter};
+
 #[derive(Debug, Clone)]
 pub struct Rgb {
     pub red: u8,
@@ -22,10 +24,6 @@ impl Rgb {
         Ok(Rgb::new(r, g, b))
     }
 
-    pub fn to_hex(&self) -> String {
-        format!("#{:02X}{:02X}{:02X}", self.red, self.green, self.blue)
-    }
-
     /// Interpolates between two RGB colors based on percentage.
     pub fn interpolate(&self, color: &Rgb, percentage: f32) -> Self {
         let ratio = percentage / 100.0;
@@ -35,5 +33,11 @@ impl Rgb {
         let b = (self.blue as f32 + (color.blue as f32 - self.blue as f32) * ratio).round() as u8;
 
         Rgb::new(r, g, b)
+    }
+}
+
+impl Display for Rgb {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "#{:02X}{:02X}{:02X}", self.red, self.green, self.blue)
     }
 }

@@ -50,7 +50,7 @@ impl Farm {
             self.height,
             self.width,
             self.height,
-            background_color.to_hex(),
+            background_color,
             self.register_objects()
         );
 
