@@ -20,18 +20,6 @@ impl Rgb {
         Rgb { red, green, blue }
     }
 
-    pub fn from_hex(hex: &str) -> Result<Self, RgbError> {
-        if hex.len() != 7 || !hex.starts_with('#') {
-            return Err(RgbError::InvalidFormat);
-        }
-
-        let r = u8::from_str_radix(&hex[1..3], 16).map_err(|_| RgbError::InvalidHexValue)?;
-        let g = u8::from_str_radix(&hex[3..5], 16).map_err(|_| RgbError::InvalidHexValue)?;
-        let b = u8::from_str_radix(&hex[5..7], 16).map_err(|_| RgbError::InvalidHexValue)?;
-
-        Ok(Rgb::new(r, g, b))
-    }
-
     /// Interpolates between two RGB colors based on percentage.
     pub fn interpolate(&self, color: &Rgb, percentage: f32) -> Self {
         let ratio = percentage / 100.0;
@@ -41,6 +29,22 @@ impl Rgb {
         let b = (self.blue as f32 + (color.blue as f32 - self.blue as f32) * ratio).round() as u8;
 
         Rgb::new(r, g, b)
+    }
+}
+
+impl TryFrom<&str> for Rgb {
+    type Error = RgbError;
+
+    fn try_from(hex: &str) -> Result<Self, Self::Error> {
+        if hex.len() != 7 || !hex.starts_with('#') {
+            return Err(RgbError::InvalidFormat);
+        }
+
+        let r = u8::from_str_radix(&hex[1..3], 16).map_err(|_| RgbError::InvalidHexValue)?;
+        let g = u8::from_str_radix(&hex[3..5], 16).map_err(|_| RgbError::InvalidHexValue)?;
+        let b = u8::from_str_radix(&hex[5..7], 16).map_err(|_| RgbError::InvalidHexValue)?;
+
+        Ok(Rgb::new(r, g, b))
     }
 }
 

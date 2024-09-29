@@ -12,17 +12,17 @@ mod tests {
 
     #[test]
     fn test_from_hex_valid() {
-        let color = Rgb::from_hex("#FF8040").unwrap();
+        let color = Rgb::try_from("#FF8040").unwrap();
         assert_eq!(color.red, 255);
         assert_eq!(color.green, 128);
         assert_eq!(color.blue, 64);
     }
 
     #[test]
-    fn test_from_hex_invalid() {
-        assert!(Rgb::from_hex("FF8040").is_err());
-        assert!(Rgb::from_hex("#FF804").is_err());
-        assert!(Rgb::from_hex("#FF80ZZ").is_err());
+    fn test_try_from_invalid() {
+        assert!(Rgb::try_from("FF8040").is_err());
+        assert!(Rgb::try_from("#FF804").is_err());
+        assert!(Rgb::try_from("#FF80ZZ").is_err());
     }
 
     #[test]

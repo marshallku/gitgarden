@@ -30,8 +30,8 @@ impl Farm {
     }
 
     pub fn render(&self) -> String {
-        let dirt_color = Rgb::from_hex("#e5c77c").unwrap();
-        let grass_color = Rgb::from_hex("#a5c543").unwrap();
+        let dirt_color = Rgb::try_from("#e5c77c").unwrap();
+        let grass_color = Rgb::try_from("#a5c543").unwrap();
         let background_color = dirt_color.interpolate(&grass_color, self.progress);
 
         let mut svg = format!(
