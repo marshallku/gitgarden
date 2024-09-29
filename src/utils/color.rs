@@ -40,11 +40,15 @@ impl TryFrom<&str> for Rgb {
             return Err(RgbError::InvalidFormat);
         }
 
-        let r = u8::from_str_radix(&hex[1..3], 16).map_err(|_| RgbError::InvalidHexValue)?;
-        let g = u8::from_str_radix(&hex[3..5], 16).map_err(|_| RgbError::InvalidHexValue)?;
-        let b = u8::from_str_radix(&hex[5..7], 16).map_err(|_| RgbError::InvalidHexValue)?;
+        let parse_component = |s: &str| -> Result<u8, RgbError> {
+            u8::from_str_radix(s, 16).map_err(|_| RgbError::InvalidHexValue)
+        };
 
-        Ok(Rgb::new(r, g, b))
+        Ok(Self {
+            red: parse_component(&hex[1..3])?,
+            green: parse_component(&hex[3..5])?,
+            blue: parse_component(&hex[5..7])?,
+        })
     }
 }
 
