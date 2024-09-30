@@ -92,8 +92,8 @@ pub async fn render_farm_service(
         Err(errors) => {
             return Err(Box::new(std::io::Error::new(
                 std::io::ErrorKind::Other,
-                format!("{:?}", errors),
-            )))
+                format!("{:?}", errors[0].message),
+            )));
         }
     };
 

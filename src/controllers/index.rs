@@ -47,13 +47,6 @@ pub async fn get(
 
             (StatusCode::OK, headers, svg)
         }
-        Err(e) => {
-            eprintln!("Error: {}", e);
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                headers,
-                "Internal Server Error".to_string(),
-            )
-        }
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, headers, e.to_string()),
     }
 }

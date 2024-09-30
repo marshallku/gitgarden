@@ -137,7 +137,12 @@ pub async fn get_user_id(user_name: &str, token: &str) -> Result<String, Vec<Git
             data: None,
             errors: Some(errors),
         } => Err(errors),
-        _ => panic!("Unexpected response"),
+        _ => Err(vec![GithubGraphQLError {
+            error_type: "ResponseError".to_string(),
+            locations: vec![],
+            message: format!("Invalid user ID: {}", user_name),
+            path: vec!["unknown".to_string()],
+        }]),
     }
 }
 
