@@ -1,6 +1,8 @@
 use std::fmt::Write;
 
-use crate::utils::{color::Rgb, encode::encode_from_path};
+use rustint::Color;
+
+use crate::utils::encode::encode_from_path;
 
 use super::{objects::Objects, renderable::Renderable};
 
@@ -30,8 +32,8 @@ impl Farm {
     }
 
     pub fn render(&self) -> String {
-        let dirt_color = Rgb::try_from("#e5c77c").unwrap();
-        let grass_color = Rgb::try_from("#a5c543").unwrap();
+        let dirt_color = Color::try_from("#e5c77c").unwrap();
+        let grass_color = Color::try_from("#a5c543").unwrap();
         let background_color = dirt_color.interpolate(&grass_color, self.progress);
 
         let mut svg = format!(

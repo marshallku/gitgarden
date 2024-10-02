@@ -1,6 +1,5 @@
 mod __tests__;
 
-pub mod color;
 pub mod coordinate;
 pub mod date;
 pub mod encode;
