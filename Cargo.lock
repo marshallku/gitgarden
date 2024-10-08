@@ -1047,9 +1047,9 @@ checksum = "719b953e2095829ee67db738b3bfa9fa368c94900df327b3f07fe6e794d2fe1f"
 
 [[package]]
 name = "rustint"
-version = "0.1.2"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c07f98b053cd361288375649cc1339c014cd62426f6c6d3df567166e89b9632"
+checksum = "d510e198c928d6911d618967d05491cb8f3ffb831f6dd9547de03679033e047e"
 dependencies = [
  "thiserror",
 ]
