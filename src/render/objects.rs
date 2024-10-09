@@ -4,7 +4,6 @@ pub enum Objects {
     FlowerTwo,
     FlowerThree,
     FlowerFour,
-    FlowerFourOverlay,
     TreeOne,
     TreeTwo,
     GrassOne,
@@ -23,7 +22,6 @@ impl Objects {
             Objects::FlowerTwo => "flower-2".to_string(),
             Objects::FlowerThree => "flower-3".to_string(),
             Objects::FlowerFour => "flower-4".to_string(),
-            Objects::FlowerFourOverlay => "flower-4-overlay".to_string(),
             Objects::TreeOne => "tree-1".to_string(),
             Objects::TreeTwo => "tree-2".to_string(),
             Objects::GrassOne => "grass-1".to_string(),
@@ -42,7 +40,6 @@ impl Objects {
             Objects::FlowerTwo => "flowers/1-2.png".to_string(),
             Objects::FlowerThree => "flowers/1-3.png".to_string(),
             Objects::FlowerFour => "flowers/1-4.png".to_string(),
-            Objects::FlowerFourOverlay => "flowers/1.overlay.png".to_string(),
             Objects::TreeOne => "objects/tree1.png".to_string(),
             Objects::TreeTwo => "objects/tree2.png".to_string(),
             Objects::GrassOne => "field/grass1.png".to_string(),
@@ -61,7 +58,6 @@ impl Objects {
             Objects::FlowerTwo => (16, 16),
             Objects::FlowerThree => (16, 16),
             Objects::FlowerFour => (16, 16),
-            Objects::FlowerFourOverlay => (16, 16),
             Objects::TreeOne => (35, 60),
             Objects::TreeTwo => (35, 60),
             Objects::GrassOne => (16, 16),
@@ -80,7 +76,6 @@ impl Objects {
             Objects::FlowerTwo,
             Objects::FlowerThree,
             Objects::FlowerFour,
-            Objects::FlowerFourOverlay,
             Objects::TreeOne,
             Objects::TreeTwo,
             Objects::GrassOne,
@@ -92,5 +87,12 @@ impl Objects {
             Objects::Dirt,
         ]
         .into_iter()
+    }
+
+    pub fn get_mask_id(&self) -> Option<String> {
+        match self {
+            Objects::FlowerFour => Some(format!("mask-{}", Objects::FlowerFour.to_string())),
+            _ => None,
+        }
     }
 }

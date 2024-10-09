@@ -2,7 +2,9 @@ use std::collections::HashMap;
 
 use chrono::{Datelike, Duration, NaiveDate};
 
-use crate::constants::render::{CELL_SIZE, CELL_SPACING, GRID_LEFT_PADDING, GRID_TOP_PADDING};
+use crate::constants::render::{
+    CELL_SIZE, CELL_SPACING, GRID_LEFT_PADDING, GRID_TOP_PADDING, MASK_CLASS,
+};
 
 use super::{objects::Objects, renderable::Renderable};
 
@@ -69,6 +71,18 @@ impl Renderable for ContributionCells {
                         y,
                         flower.to_string()
                     ));
+
+                    if flower.get_mask_id().is_some() {
+                        cells.push_str(&format!(
+                            r##"<rect mask="url(#{})" x="{}" y="{}" width="{}" height="{}" fill="#132345" class="{}" />"##,
+                            flower.get_mask_id().unwrap(),
+                            x,
+                            y,
+                            CELL_SIZE,
+                            CELL_SIZE,
+                            MASK_CLASS
+                        ));
+                    }
                 }
             }
         }
