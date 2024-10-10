@@ -2,8 +2,9 @@ use std::collections::HashMap;
 
 use chrono::{Datelike, Duration, NaiveDate};
 
-use crate::constants::render::{
-    CELL_SIZE, CELL_SPACING, GRID_LEFT_PADDING, GRID_TOP_PADDING, MASK_CLASS,
+use crate::{
+    api::languages::MostUsedLanguage,
+    constants::render::{CELL_SIZE, CELL_SPACING, GRID_LEFT_PADDING, GRID_TOP_PADDING, MASK_CLASS},
 };
 
 use super::{objects::Objects, renderable::Renderable};
@@ -13,6 +14,7 @@ pub struct ContributionCells {
     start_date: NaiveDate,
     weeks: usize,
     commits: HashMap<String, u32>,
+    most_used_languages: Vec<MostUsedLanguage>,
 }
 
 impl ContributionCells {
@@ -21,12 +23,14 @@ impl ContributionCells {
         start_date: NaiveDate,
         weeks: usize,
         commits: HashMap<String, u32>,
+        most_used_languages: Vec<MostUsedLanguage>,
     ) -> Self {
         Self {
             year,
             start_date,
             weeks,
             commits,
+            most_used_languages,
         }
     }
 }
@@ -34,6 +38,14 @@ impl ContributionCells {
 impl Renderable for ContributionCells {
     fn render(&self) -> String {
         let mut cells = String::new();
+
+        print!("{:?}", self.most_used_languages);
+
+        let most_used_language = self
+            .most_used_languages
+            .iter()
+            .max_by(|a, b| a.percentage.partial_cmp(&b.percentage).unwrap())
+            .unwrap();
 
         for week in 0..self.weeks {
             for day in 0..7 {
@@ -74,12 +86,13 @@ impl Renderable for ContributionCells {
 
                     if flower.get_mask_id().is_some() {
                         cells.push_str(&format!(
-                            r##"<rect mask="url(#{})" x="{}" y="{}" width="{}" height="{}" fill="#132345" class="{}" />"##,
+                            r##"<rect mask="url(#{})" x="{}" y="{}" width="{}" height="{}" fill="{}" class="{}" />"##,
                             flower.get_mask_id().unwrap(),
                             x,
                             y,
                             CELL_SIZE,
                             CELL_SIZE,
+                            most_used_language.color,
                             MASK_CLASS
                         ));
                     }

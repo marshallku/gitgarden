@@ -59,8 +59,8 @@ pub struct MostUsedLanguage {
 
 #[allow(dead_code)]
 pub async fn get_most_used_languages(
-    user_name: String,
-    token: String,
+    user_name: &str,
+    token: &str,
 ) -> Result<Vec<MostUsedLanguage>, Vec<GithubGraphQLError>> {
     let query = r#"
     query userInfo($login: String!) {
@@ -137,7 +137,8 @@ pub async fn get_most_used_languages(
     let calculated_result = language_totals
         .iter()
         .map(|(name, &size)| {
-            let percentage = (size / total_size) as f32 * 100.0;
+            let percentage = (size as f32 / total_size as f32) * 100.0;
+
             let color = nodes
                 .iter()
                 .find_map(|repo| {

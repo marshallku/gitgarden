@@ -150,7 +150,7 @@ pub async fn get_stats(
     user_name: &str,
     from: String,
     to: String,
-    token: String,
+    token: &str,
 ) -> Result<User, Vec<GithubGraphQLError>> {
     let user_id = match get_user_id(user_name, &token).await {
         Ok(user_id) => user_id,

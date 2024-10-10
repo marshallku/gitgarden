@@ -6,6 +6,7 @@ use tokio::task;
 use crate::{
     api::{
         contributions::get_daily_commits,
+        languages::get_most_used_languages,
         stats::{get_stats, ContributionsCollection},
     },
     constants::render::{CELL_SIZE, CELL_SPACING, GRID_LEFT_PADDING},
@@ -74,21 +75,38 @@ pub async fn render_farm_service(
 
     let stats = task::spawn({
         let user_name = user_name.to_string();
+        let token = state.token.clone();
 
         async move {
             get_stats(
                 &user_name,
                 format!("{}-01-01T00:00:00Z", year),
                 format!("{}-12-31T23:59:59Z", year),
-                state.token,
+                &token,
             )
             .await
         }
     });
 
+    let most_used_languages = task::spawn({
+        let user_name = user_name.to_string();
+        let token = state.token.clone();
+
+        async move { get_most_used_languages(&user_name, &token).await }
+    });
+
     let commits = commits.await?;
     let stats = match stats.await? {
         Ok(stats) => stats,
+        Err(errors) => {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("{:?}", errors[0].message),
+            )));
+        }
+    };
+    let most_used_languages = match most_used_languages.await? {
+        Ok(languages) => languages,
         Err(errors) => {
             return Err(Box::new(std::io::Error::new(
                 std::io::ErrorKind::Other,
@@ -108,7 +126,13 @@ pub async fn render_farm_service(
     println!("Most frequent commit time: {:?}", time);
 
     farm.set_progress(progress);
-    farm.add_object(ContributionCells::new(year, start_date, weeks, commits));
+    farm.add_object(ContributionCells::new(
+        year,
+        start_date,
+        weeks,
+        commits,
+        most_used_languages,
+    ));
     farm.add_object(Grasses::new(
         user_name,
         width,
