@@ -91,6 +91,7 @@ impl Objects {
 
     pub fn get_mask_id(&self) -> Option<String> {
         match self {
+            Objects::FlowerThree => Some(format!("mask-{}", Objects::FlowerThree.to_string())),
             Objects::FlowerFour => Some(format!("mask-{}", Objects::FlowerFour.to_string())),
             _ => None,
         }

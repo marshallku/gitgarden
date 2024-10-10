@@ -81,9 +81,14 @@ impl Farm {
             r##"
             <mask id="{}" maskUnits="objectBoundingBox" maskContentUnits="objectBoundingBox">
                 <rect x="0" y="0" width="1" height="1" fill="#000"/>
+                <path d="M0.4375 0.25h0.0625V0.1875h0.0625V0.125h0.25v0.125h0.125v0.1875h-0.0625v0.0625h-0.0625v0.0625h-0.1875V0.5H0.5625V0.4375H0.5V0.375H0.4375V0.25z" fill="#fff"/>
+            </mask>
+            <mask id="{}" maskUnits="objectBoundingBox" maskContentUnits="objectBoundingBox">
+                <rect x="0" y="0" width="1" height="1" fill="#000"/>
                 <path d="M0.0625 0.3125h0.06375v-0.0625H0.5v-0.061875L0.5625 0.1875v-0.0625h0.25v0.061875L0.875 0.1875v0.0625h0.0625v0.0625h0.0625v0.438125L0.9375 0.75v0.0625h-0.3125v0.0625h-0.0625v0.0625h-0.121875L0.4375 0.875h-0.0625v-0.0625h-0.25v-0.0625h-0.0625v-0.4375z" fill="#fff"/>
             </mask>
             "##,
+            Objects::FlowerThree.get_mask_id().unwrap(),
             Objects::FlowerFour.get_mask_id().unwrap()
         )
     }
