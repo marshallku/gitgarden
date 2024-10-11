@@ -1,4 +1,3 @@
-use chrono::Utc;
 use tokio::task;
 
 use crate::{
@@ -22,12 +21,12 @@ pub async fn render_farm_service(
 
         async move { get_daily_commits(&user_name, year).await.unwrap() }
     });
-    let (start_date, end_date) = get_year_range(year).unwrap();
-    let weeks = calculate_weeks(start_date, end_date);
+    let most_used_languages = task::spawn({
+        let user_name = user_name.to_string();
+        let token = state.token.clone();
 
-    let width = weeks as u32 * (CELL_SIZE + CELL_SPACING) + GRID_LEFT_PADDING * 2;
-    const HEIGHT: u32 = 465;
-
+        async move { get_most_used_languages(&user_name, &token).await }
+    });
     let stats = task::spawn({
         let user_name = user_name.to_string();
         let token = state.token.clone();
@@ -43,14 +42,12 @@ pub async fn render_farm_service(
         }
     });
 
-    let most_used_languages = task::spawn({
-        let user_name = user_name.to_string();
-        let token = state.token.clone();
+    let (start_date, end_date) = get_year_range(year).unwrap();
+    let weeks = calculate_weeks(start_date, end_date);
 
-        async move { get_most_used_languages(&user_name, &token).await }
-    });
+    let width = weeks as u32 * (CELL_SIZE + CELL_SPACING) + GRID_LEFT_PADDING * 2;
+    const HEIGHT: u32 = 465;
 
-    let now = Utc::now();
     let commits = commits.await?;
     let stats = match stats.await? {
         Ok(stats) => stats,
@@ -61,9 +58,6 @@ pub async fn render_farm_service(
             )));
         }
     };
-    println!("STATS {:?}", Utc::now() - now);
-
-    let now = Utc::now();
     let most_used_languages = match most_used_languages.await? {
         Ok(languages) => languages,
         Err(errors) => {
@@ -73,7 +67,6 @@ pub async fn render_farm_service(
             )));
         }
     };
-    println!("MOST_USED_LANGUAGES {:?}", Utc::now() - now);
 
     let mut farm = Farm::new(width, HEIGHT);
     // length of key of commits / (365 / 2) * 100, upper bound 100
