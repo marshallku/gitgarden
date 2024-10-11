@@ -73,7 +73,7 @@ impl Farm {
 
         svg.push_str("</svg>");
 
-        svg
+        svg.replace('\n', "")
     }
 
     fn register_masks(&self) -> String {
