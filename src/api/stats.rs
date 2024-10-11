@@ -47,13 +47,6 @@ pub struct ContributionsCollection {
     pub total_repositories_with_contributed_pull_requests: i32,
     #[serde(rename = "totalRepositoriesWithContributedPullRequestReviews")]
     pub total_repositories_with_contributed_pull_request_reviews: i32,
-    #[serde(rename = "commitContributionsByRepository")]
-    pub commit_contributions_by_repository: Vec<CommitContributionsByRepository>,
-}
-
-#[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct CommitContributionsByRepository {
-    pub repository: Repository,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -96,6 +89,7 @@ pub struct Author {
     pub email: String,
 }
 
+#[allow(dead_code)]
 pub async fn get_user_id(user_name: &str, token: &str) -> Result<String, Vec<GithubGraphQLError>> {
     let query = r#"
     query($login: String!) {
@@ -152,15 +146,8 @@ pub async fn get_stats(
     to: String,
     token: &str,
 ) -> Result<User, Vec<GithubGraphQLError>> {
-    let user_id = match get_user_id(user_name, &token).await {
-        Ok(user_id) => user_id,
-        Err(errors) => {
-            return Err(errors);
-        }
-    };
-
     let query = r#"
-    query($login: String!, $userId: ID!, $from: DateTime!, $to: DateTime!, $since: GitTimestamp!, $until: GitTimestamp!) {
+    query($login: String!, $from: DateTime!, $to: DateTime!) {
         user(login: $login) {
             login contributionsCollection(from: $from, to: $to) {
                 totalCommitContributions
@@ -171,28 +158,6 @@ pub async fn get_stats(
                 totalRepositoriesWithContributedIssues
                 totalRepositoriesWithContributedPullRequests
                 totalRepositoriesWithContributedPullRequestReviews
-                commitContributionsByRepository(maxRepositories:50) {
-                repository {
-                    defaultBranchRef {
-                        target {
-                            ... on Commit {
-                                history(first: 50, since: $since, until: $until, author:{ id: $userId }) {
-                                        edges {
-                                            node {
-                                                message
-                                                author {
-                                                    email
-                                                }
-                                                committedDate
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        name
-                    }
-                }
             }
         } 
     }
@@ -205,9 +170,6 @@ pub async fn get_stats(
             "login": user_name,
             "from": from,
             "to": to,
-            "since": from,
-            "until": to,
-            "userId": user_id,
         }
     });
 
