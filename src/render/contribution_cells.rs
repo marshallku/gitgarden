@@ -39,8 +39,6 @@ impl Renderable for ContributionCells {
     fn render(&self) -> String {
         let mut cells = String::new();
 
-        print!("{:?}", self.most_used_languages);
-
         let most_used_language = self
             .most_used_languages
             .iter()
