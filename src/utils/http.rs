@@ -16,7 +16,7 @@ pub fn get_cache_header(age: &str) -> HeaderMap {
         format!("public, max-age={}", age)
     };
 
-    let expires = if parsed_age <= 0 {
+    let expires = if parsed_age == 0 {
         "0".to_string()
     } else {
         let now = Utc::now();
