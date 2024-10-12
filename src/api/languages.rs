@@ -91,7 +91,7 @@ pub async fn get_most_used_languages(
         }
     });
 
-    let response = match github_graphql_request(query, &headers, data, &token).await {
+    let response = match github_graphql_request(query, &headers, data, token).await {
         Ok(response) => response,
         Err(error) => {
             println!("Error: {:?}", error);
