@@ -36,7 +36,7 @@ impl Farm {
         let grass_color = Color::try_from("#a5c543").unwrap();
         let background_color = dirt_color.interpolate(&grass_color, self.progress);
 
-        let mut svg = format!(
+        let svg = format!(
             r##"
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -56,6 +56,8 @@ impl Farm {
                </defs>
                <defs>{}</defs>
                <defs>{}</defs>
+               {}
+            </svg>
             "##,
             self.width,
             self.height,
@@ -64,14 +66,12 @@ impl Farm {
             background_color,
             MASK_CLASS,
             self.register_objects(),
-            self.register_masks()
+            self.register_masks(),
+            self.objects
+                .iter()
+                .map(|object| object.render())
+                .collect::<String>()
         );
-
-        for object in &self.objects {
-            svg.push_str(&object.render());
-        }
-
-        svg.push_str("</svg>");
 
         svg.replace('\n', "")
     }
