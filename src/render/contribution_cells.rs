@@ -46,6 +46,8 @@ impl Renderable for ContributionCells {
             .unwrap();
 
         for week in 0..self.weeks {
+            let x_coord = GRID_LEFT_PADDING + week as u32 * (CELL_SIZE + CELL_SPACING);
+
             for day in 0..7 {
                 let current_date = self.start_date + Duration::days((week * 7 + day) as i64);
 
@@ -53,18 +55,15 @@ impl Renderable for ContributionCells {
                     continue;
                 }
 
+                let y_coord = GRID_TOP_PADDING + day as u32 * (CELL_SIZE + CELL_SPACING);
                 let formatted_date = current_date.format("%Y-%m-%d").to_string();
-
-                let x = GRID_LEFT_PADDING + week as u32 * (CELL_SIZE + CELL_SPACING);
-                let y = GRID_TOP_PADDING + day as u32 * (CELL_SIZE + CELL_SPACING);
-
                 let commit_level = self.commits.get(&formatted_date).unwrap_or(&0);
 
                 write!(
                     cells,
                     r##"<use x="{}" y="{}" xlink:href="#{}" />"##,
-                    x,
-                    y,
+                    x_coord,
+                    y_coord,
                     Objects::Dirt.to_string()
                 )
                 .unwrap();
@@ -80,8 +79,8 @@ impl Renderable for ContributionCells {
                     write!(
                         cells,
                         r##"<use x="{}" y="{}" xlink:href="#{}" />"##,
-                        x,
-                        y,
+                        x_coord,
+                        y_coord,
                         flower.to_string()
                     )
                     .unwrap();
@@ -91,8 +90,8 @@ impl Renderable for ContributionCells {
                             cells,
                             r##"<rect mask="url(#{})" x="{}" y="{}" width="{}" height="{}" fill="{}" class="{}" />"##,
                             flower.get_mask_id().unwrap(),
-                            x,
-                            y,
+                            x_coord,
+                            y_coord,
                             CELL_SIZE,
                             CELL_SIZE,
                             most_used_language.color,
