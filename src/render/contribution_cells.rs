@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Write};
 
 use chrono::{Datelike, Duration, NaiveDate};
 
@@ -60,12 +60,14 @@ impl Renderable for ContributionCells {
 
                 let commit_level = self.commits.get(&formatted_date).unwrap_or(&0);
 
-                cells.push_str(&format!(
+                write!(
+                    cells,
                     r##"<use x="{}" y="{}" xlink:href="#{}" />"##,
                     x,
                     y,
                     Objects::Dirt.to_string()
-                ));
+                )
+                .unwrap();
 
                 if *commit_level > 0 {
                     let flower = match *commit_level {
@@ -75,15 +77,18 @@ impl Renderable for ContributionCells {
                         _ => Objects::FlowerFour,
                     };
 
-                    cells.push_str(&format!(
+                    write!(
+                        cells,
                         r##"<use x="{}" y="{}" xlink:href="#{}" />"##,
                         x,
                         y,
                         flower.to_string()
-                    ));
+                    )
+                    .unwrap();
 
                     if flower.get_mask_id().is_some() {
-                        cells.push_str(&format!(
+                        write!(
+                            cells,
                             r##"<rect mask="url(#{})" x="{}" y="{}" width="{}" height="{}" fill="{}" class="{}" />"##,
                             flower.get_mask_id().unwrap(),
                             x,
@@ -92,7 +97,7 @@ impl Renderable for ContributionCells {
                             CELL_SIZE,
                             most_used_language.color,
                             MASK_CLASS
-                        ));
+                        ).unwrap();
                     }
                 }
             }
