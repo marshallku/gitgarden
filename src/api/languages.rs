@@ -30,6 +30,8 @@ pub struct Repositories {
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Repository {
     pub name: String,
+    #[serde(rename = "updatedAt")]
+    pub updated_at: String,
     pub languages: Languages,
 }
 
@@ -60,15 +62,17 @@ pub struct MostUsedLanguage {
 #[allow(dead_code)]
 pub async fn get_most_used_languages(
     user_name: &str,
+    year: i32,
     token: &str,
 ) -> Result<Vec<MostUsedLanguage>, Vec<GithubGraphQLError>> {
     let query = r#"
     query userInfo($login: String!) {
         user(login: $login) {
-            repositories(ownerAffiliations: OWNER, isFork: false, first: 100) {
+            repositories(ownerAffiliations: OWNER, isFork: false, first: 10, orderBy: { field: UPDATED_AT, direction: DESC }) {
             nodes {
                 name
-                languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
+                updatedAt
+                languages(first: 5, orderBy: {field: SIZE, direction: DESC}) {
                         edges {
                             size
                             node {
@@ -127,6 +131,10 @@ pub async fn get_most_used_languages(
 
     // Sum up sizes for each language across all repositories
     for repo in nodes.clone() {
+        if !repo.updated_at.starts_with(&year.to_string()) {
+            continue;
+        }
+
         for edge in &repo.languages.edges {
             *language_totals.entry(edge.node.name.clone()).or_insert(0) += edge.size;
             total_size += edge.size;

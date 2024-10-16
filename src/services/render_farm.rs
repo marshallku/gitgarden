@@ -25,7 +25,7 @@ pub async fn render_farm_service(
         let user_name = user_name.to_string();
         let token = state.token.clone();
 
-        async move { get_most_used_languages(&user_name, &token).await }
+        async move { get_most_used_languages(&user_name, year, &token).await }
     });
     let stats = task::spawn({
         let user_name = user_name.to_string();
