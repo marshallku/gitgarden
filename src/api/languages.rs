@@ -65,27 +65,7 @@ pub async fn get_most_used_languages(
     year: i32,
     token: &str,
 ) -> Result<Vec<MostUsedLanguage>, Vec<GithubGraphQLError>> {
-    let query = r#"
-    query userInfo($login: String!) {
-        user(login: $login) {
-            repositories(ownerAffiliations: OWNER, isFork: false, first: 10, orderBy: { field: UPDATED_AT, direction: DESC }) {
-            nodes {
-                name
-                updatedAt
-                languages(first: 5, orderBy: {field: SIZE, direction: DESC}) {
-                        edges {
-                            size
-                            node {
-                                color
-                                name
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    "#;
+    let query = include_str!("schemas/most_used_languages.gql");
 
     let headers: HashMap<&str, &str> = HashMap::new();
 

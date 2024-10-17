@@ -1,0 +1,24 @@
+query userInfo($login: String!) {
+    user(login: $login) {
+        repositories(
+            ownerAffiliations: OWNER
+            isFork: false
+            first: 10
+            orderBy: { field: UPDATED_AT, direction: DESC }
+        ) {
+            nodes {
+                name
+                updatedAt
+                languages(first: 5, orderBy: { field: SIZE, direction: DESC }) {
+                    edges {
+                        size
+                        node {
+                            color
+                            name
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

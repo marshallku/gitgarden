@@ -91,13 +91,7 @@ pub struct Author {
 
 #[allow(dead_code)]
 pub async fn get_user_id(user_name: &str, token: &str) -> Result<String, Vec<GithubGraphQLError>> {
-    let query = r#"
-    query($login: String!) {
-        user(login: $login) {
-            id
-        }
-    }
-    "#;
+    let query = include_str!("schemas/user_id.gql");
 
     let headers: HashMap<&str, &str> = HashMap::new();
 
@@ -146,22 +140,7 @@ pub async fn get_stats(
     to: String,
     token: &str,
 ) -> Result<User, Vec<GithubGraphQLError>> {
-    let query = r#"
-    query($login: String!, $from: DateTime!, $to: DateTime!) {
-        user(login: $login) {
-            login contributionsCollection(from: $from, to: $to) {
-                totalCommitContributions
-                totalIssueContributions
-                totalPullRequestContributions
-                totalPullRequestReviewContributions
-                totalRepositoriesWithContributedCommits
-                totalRepositoriesWithContributedIssues
-                totalRepositoriesWithContributedPullRequests
-                totalRepositoriesWithContributedPullRequestReviews
-            }
-        } 
-    }
-    "#;
+    let query = include_str!("schemas/stats.gql");
 
     let headers: HashMap<&str, &str> = HashMap::new();
 
