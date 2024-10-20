@@ -28,4 +28,30 @@ mod tests {
         assert_eq!(rendered.matches("<use").count(), 7);
         assert_eq!(rendered.matches(&object_id).count(), 7);
     }
+
+    #[test]
+    fn test_contribution_cells_render_with_commits() {
+        let year = 2023;
+        let start_date = NaiveDate::from_ymd_opt(2023, 1, 1).unwrap();
+        let weeks = 1;
+        let mut commits = HashMap::new();
+        commits.insert("2023-01-01".to_string(), 1);
+        commits.insert("2023-01-03".to_string(), 2);
+        commits.insert("2023-01-05".to_string(), 3);
+        commits.insert("2023-01-07".to_string(), 4);
+        let most_used_languages = vec![MostUsedLanguage {
+            name: "Rust".to_string(),
+            color: "#dea584".to_string(),
+            percentage: 100.0,
+        }];
+
+        let cells = ContributionCells::new(year, start_date, weeks, commits, most_used_languages);
+        let rendered = cells.render();
+
+        assert_eq!(rendered.matches("<use").count(), 7 + 4);
+        assert!(rendered.contains("flower-1"));
+        assert!(rendered.contains("flower-2"));
+        assert!(rendered.contains("flower-3"));
+        assert!(rendered.contains("flower-4"));
+    }
 }
