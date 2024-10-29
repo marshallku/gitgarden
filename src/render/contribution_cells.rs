@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Write};
+use std::{cmp::Ordering, collections::HashMap, fmt::Write};
 
 use chrono::{Datelike, Duration, NaiveDate};
 
@@ -39,11 +39,11 @@ impl Renderable for ContributionCells {
     fn render(&self) -> String {
         let mut cells = String::new();
 
-        let most_used_language = self
-            .most_used_languages
-            .iter()
-            .max_by(|a, b| a.percentage.partial_cmp(&b.percentage).unwrap())
-            .unwrap();
+        let most_used_language = self.most_used_languages.iter().max_by(|a, b| {
+            a.percentage
+                .partial_cmp(&b.percentage)
+                .unwrap_or(Ordering::Equal)
+        });
 
         for week in 0..self.weeks {
             let x_coord = GRID_LEFT_PADDING + week as u32 * (CELL_SIZE + CELL_SPACING);
@@ -85,7 +85,7 @@ impl Renderable for ContributionCells {
                     )
                     .unwrap();
 
-                    if flower.get_mask_id().is_some() {
+                    if most_used_language.is_some() && flower.get_mask_id().is_some() {
                         write!(
                             cells,
                             r##"<rect mask="url(#{})" x="{}" y="{}" width="{}" height="{}" fill="{}" class="{}" />"##,
@@ -94,7 +94,7 @@ impl Renderable for ContributionCells {
                             y_coord,
                             CELL_SIZE,
                             CELL_SIZE,
-                            most_used_language.color,
+                            most_used_language.unwrap().color,
                             MASK_CLASS
                         ).unwrap();
                     }

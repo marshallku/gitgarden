@@ -54,4 +54,19 @@ mod tests {
         assert!(rendered.contains("flower-3"));
         assert!(rendered.contains("flower-4"));
     }
+
+    #[test]
+    fn test_most_used_language_is_none() {
+        let year = 2024;
+        let start_date = NaiveDate::from_ymd_opt(2024, 1, 1).unwrap();
+        let weeks = 1;
+        let commits = HashMap::new();
+        let most_used_languages = vec![];
+
+        let cells = ContributionCells::new(year, start_date, weeks, commits, most_used_languages);
+        let rendered = cells.render();
+
+        assert_eq!(rendered.matches("<use").count(), 7);
+        assert_eq!(rendered.matches("<rect").count(), 0);
+    }
 }
