@@ -1,4 +1,7 @@
-use reqwest::{Client, Error};
+use reqwest::{
+    header::{HeaderMap, HeaderName, ACCEPT, AUTHORIZATION, USER_AGENT},
+    Client, Error,
+};
 use serde_json::{json, Value};
 use std::collections::HashMap;
 
@@ -10,17 +13,14 @@ pub async fn github_graphql_request(
 ) -> Result<Value, Error> {
     let client = Client::new();
 
-    let mut request_headers = reqwest::header::HeaderMap::new();
-    request_headers.insert(
-        reqwest::header::AUTHORIZATION,
-        format!("token {}", token).parse().unwrap(),
-    );
-    request_headers.insert(reqwest::header::ACCEPT, "*/*".parse().unwrap());
-    request_headers.insert(reqwest::header::USER_AGENT, "reqwest".parse().unwrap());
+    let mut request_headers = HeaderMap::new();
+    request_headers.insert(AUTHORIZATION, format!("token {}", token).parse().unwrap());
+    request_headers.insert(ACCEPT, "*/*".parse().unwrap());
+    request_headers.insert(USER_AGENT, "reqwest".parse().unwrap());
 
     for (key, value) in headers {
         request_headers.insert(
-            reqwest::header::HeaderName::from_bytes(key.as_bytes()).unwrap(),
+            HeaderName::from_bytes(key.as_bytes()).unwrap(),
             value.parse().unwrap(),
         );
     }
