@@ -60,12 +60,12 @@ mod tests {
     #[test]
     fn test_get_year_range_consistency() {
         for year in -1000..=1000 {
-            if let Some((start, end)) = get_year_range(year) {
-                assert_eq!(start.weekday(), Weekday::Sun);
-                assert!(end.weekday() == Weekday::Sat || end.weekday() == Weekday::Sun);
-                assert!(start <= NaiveDate::from_ymd_opt(year, 1, 1).unwrap());
-                assert!(end >= NaiveDate::from_ymd_opt(year, 12, 31).unwrap());
-            }
+            let (start, end) = get_year_range(year).unwrap();
+
+            assert_eq!(start.weekday(), Weekday::Sun);
+            assert!(end.weekday() == Weekday::Sat || end.weekday() == Weekday::Sun);
+            assert!(start <= NaiveDate::from_ymd_opt(year, 1, 1).unwrap());
+            assert!(end >= NaiveDate::from_ymd_opt(year, 12, 31).unwrap());
         }
     }
 }
