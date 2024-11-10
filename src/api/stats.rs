@@ -176,6 +176,11 @@ pub async fn get_stats(
             data: None,
             errors: Some(errors),
         } => Err(errors),
-        _ => panic!("Unexpected response"),
+        _ => Err(vec![GithubGraphQLError {
+            error_type: "ResponseError".to_string(),
+            locations: vec![],
+            message: format!("Invalid user: {}", user_name),
+            path: vec!["unknown".to_string()],
+        }]),
     }
 }
