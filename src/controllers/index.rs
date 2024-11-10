@@ -23,13 +23,14 @@ pub async fn get(
     State(state): State<AppState>,
     ExtractFullOrigin(origin): ExtractFullOrigin,
 ) -> impl IntoResponse {
-    let mut headers = get_cache_header("1h");
     let year = year.unwrap_or_else(|| chrono::Local::now().year());
 
     let rendered_svg = render_farm_service(&user_name, year, state).await;
 
     match rendered_svg {
         Ok(svg) => {
+            let mut headers = get_cache_header("1h");
+
             headers.insert("Content-Type", "image/svg+xml".parse().unwrap());
             headers.insert(
                 "Accept-Ch",
@@ -47,6 +48,13 @@ pub async fn get(
 
             (StatusCode::OK, headers, svg)
         }
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, headers, e.to_string()),
+        Err(e) => {
+            let mut headers = get_cache_header("0");
+
+            headers.insert("Access-Control-Allow-Origin", origin.parse().unwrap());
+            headers.insert("X-Content-Type-Options", "nosniff".parse().unwrap());
+
+            (StatusCode::INTERNAL_SERVER_ERROR, headers, e.to_string())
+        }
     }
 }
