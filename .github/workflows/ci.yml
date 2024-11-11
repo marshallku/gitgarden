@@ -80,6 +80,7 @@ jobs:
     docker:
         name: Deploy image
         runs-on: ubuntu-latest
+        needs: [build, test]
         steps:
             - uses: actions/checkout@v4
             - uses: actions-rust-lang/setup-rust-toolchain@v1
