@@ -8,13 +8,13 @@ use serde::Deserialize;
 
 use crate::{
     env::state::AppState,
-    services::render_farm::render_farm_service,
+    services::{render_farm::render_farm_service, render_page::render_page_service},
     utils::{extractor::ExtractFullOrigin, http::get_cache_header},
 };
 
 #[derive(Deserialize)]
 pub struct Options {
-    user_name: String,
+    user_name: Option<String>,
     year: Option<i32>,
 }
 
@@ -23,8 +23,17 @@ pub async fn get(
     State(state): State<AppState>,
     ExtractFullOrigin(origin): ExtractFullOrigin,
 ) -> impl IntoResponse {
-    let year = year.unwrap_or_else(|| chrono::Local::now().year());
+    if user_name.is_none() {
+        let mut headers = get_cache_header("1h");
+        let rendered_page = render_page_service().await;
 
+        headers.insert("Content-Type", "text/html".parse().unwrap());
+
+        return (StatusCode::OK, headers, rendered_page);
+    }
+
+    let user_name = user_name.unwrap();
+    let year = year.unwrap_or_else(|| chrono::Local::now().year());
     let rendered_svg = render_farm_service(&user_name, year, state).await;
 
     match rendered_svg {
@@ -46,7 +55,7 @@ pub async fn get(
             headers.insert("Access-Control-Allow-Origin", origin.parse().unwrap());
             headers.insert("X-Content-Type-Options", "nosniff".parse().unwrap());
 
-            (StatusCode::OK, headers, svg)
+            return (StatusCode::OK, headers, svg);
         }
         Err(e) => {
             let mut headers = get_cache_header("0");
@@ -54,7 +63,7 @@ pub async fn get(
             headers.insert("Access-Control-Allow-Origin", origin.parse().unwrap());
             headers.insert("X-Content-Type-Options", "nosniff".parse().unwrap());
 
-            (StatusCode::INTERNAL_SERVER_ERROR, headers, e.to_string())
+            return (StatusCode::INTERNAL_SERVER_ERROR, headers, e.to_string());
         }
     }
 }
