@@ -1,4 +1,5 @@
 use tokio::task;
+use tracing::error;
 
 use crate::{
     api::{contributions::get_daily_commits, languages::get_most_used_languages, stats::get_stats},
@@ -49,22 +50,12 @@ pub async fn render_farm_service(
     const HEIGHT: u32 = 465;
 
     let commits = commits.await?;
-    let stats = match stats.await? {
-        Ok(stats) => stats,
-        Err(errors) => {
-            return Err(Box::new(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                format!("{:?}", errors[0].message),
-            )));
-        }
-    };
+    let stats = stats.await?;
     let most_used_languages = match most_used_languages.await? {
         Ok(languages) => languages,
-        Err(errors) => {
-            return Err(Box::new(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                format!("{:?}", errors[0].message),
-            )));
+        Err(err) => {
+            error!("Failed to get most used languages: {:?}", err);
+            vec![]
         }
     };
 
@@ -82,20 +73,24 @@ pub async fn render_farm_service(
         commits,
         most_used_languages,
     ));
-    farm.add_object(Grasses::new(
-        user_name,
-        width,
-        &stats.contributions_collection,
-        &home.dead_zone,
-    ));
-    farm.add_object(Trees::new(
-        user_name,
-        width,
-        stats
-            .contributions_collection
-            .total_repositories_with_contributed_commits,
-        &home.dead_zone,
-    ));
+    if stats.is_ok() {
+        let stats = stats.unwrap();
+
+        farm.add_object(Grasses::new(
+            user_name,
+            width,
+            &stats.contributions_collection,
+            &home.dead_zone,
+        ));
+        farm.add_object(Trees::new(
+            user_name,
+            width,
+            stats
+                .contributions_collection
+                .total_repositories_with_contributed_commits,
+            &home.dead_zone,
+        ));
+    }
     farm.add_object(home);
 
     Ok(farm.render())
