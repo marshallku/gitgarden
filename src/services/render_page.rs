@@ -194,7 +194,7 @@ pub async fn render_page_service() -> String {
 
             const imagePath = `${location.origin}/?${queries.toString()}`;
 
-            copy(imagePath);
+            copy(`[![GitGarden](${imagePath})](https://github.com/marshallku/gitgarden)`);
 
             imageContainer.innerHTML = `<img src="${imagePath}" alt="Git Garden for ${user_name} in ${year}">`;
         });
