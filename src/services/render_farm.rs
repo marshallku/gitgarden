@@ -43,12 +43,6 @@ pub async fn render_farm_service(
         }
     });
 
-    let (start_date, end_date) = get_year_range(year).unwrap();
-    let weeks = calculate_weeks(start_date, end_date);
-
-    let width = weeks as u32 * (CELL_SIZE + CELL_SPACING) + GRID_LEFT_PADDING * 2;
-    const HEIGHT: u32 = 465;
-
     let commits = commits.await?;
     let stats = stats.await?;
     let most_used_languages = match most_used_languages.await? {
@@ -59,7 +53,13 @@ pub async fn render_farm_service(
         }
     };
 
-    let mut farm = Farm::new(width, HEIGHT);
+    let (start_date, end_date) = get_year_range(year).unwrap();
+    let weeks = calculate_weeks(start_date, end_date);
+
+    let width = weeks as u32 * (CELL_SIZE + CELL_SPACING) + GRID_LEFT_PADDING * 2;
+    let height = 465;
+
+    let mut farm = Farm::new(width, height);
     // length of key of commits / (365 / 2) * 100, upper bound 100
     let progress = (commits.len() as f32 / 182.5 * 100.0).min(100.0);
 
@@ -73,6 +73,7 @@ pub async fn render_farm_service(
         commits,
         most_used_languages,
     ));
+
     if stats.is_ok() {
         let stats = stats.unwrap();
 
@@ -91,6 +92,7 @@ pub async fn render_farm_service(
             &home.dead_zone,
         ));
     }
+
     farm.add_object(home);
 
     Ok(farm.render())
