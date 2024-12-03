@@ -54,19 +54,8 @@ impl Objects {
 
     pub fn to_size(&self) -> (u32, u32) {
         match self {
-            Objects::FlowerOne => (16, 16),
-            Objects::FlowerTwo => (16, 16),
-            Objects::FlowerThree => (16, 16),
-            Objects::FlowerFour => (16, 16),
-            Objects::TreeOne => (35, 60),
-            Objects::TreeTwo => (35, 60),
-            Objects::GrassOne => (16, 16),
-            Objects::GrassTwo => (16, 16),
-            Objects::GrassThree => (16, 16),
-            Objects::GrassFour => (16, 16),
-            Objects::GrassFive => (16, 16),
-            Objects::GrassSix => (16, 16),
-            Objects::Dirt => (16, 16),
+            Objects::TreeOne | Objects::TreeTwo => (35, 60),
+            _ => (16, 16),
         }
     }
 
