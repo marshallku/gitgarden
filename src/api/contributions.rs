@@ -1,11 +1,11 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Instant};
 use tl::{parse, ParserOptions};
 
 fn parse_commit_from_string(
     data: &str,
 ) -> Result<HashMap<String, u32>, Box<dyn std::error::Error>> {
     let mut commits_by_day = HashMap::with_capacity(366);
-    let document = parse(data, ParserOptions::default()).unwrap();
+    let document = parse(data, ParserOptions::default())?;
     let nodes = document
         .nodes()
         .iter()
@@ -53,7 +53,10 @@ pub async fn get_daily_commits(
     );
 
     let response = reqwest::get(&url).await?.text().await?;
+    let start = Instant::now();
     let commits = parse_commit_from_string(&response)?;
+    let duration = start.elapsed();
+    println!("Parsing took: {:?}", duration);
 
     Ok(commits)
 }
