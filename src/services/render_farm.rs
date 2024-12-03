@@ -1,8 +1,15 @@
+use std::collections::HashMap;
+
 use tokio::task;
 use tracing::error;
 
 use crate::{
-    api::{contributions::get_daily_commits, languages::get_most_used_languages, stats::get_stats},
+    api::{
+        contributions::get_daily_commits,
+        languages::get_most_used_languages,
+        stats::{get_stats, User},
+        structures::GithubGraphQLError,
+    },
     constants::render::{CELL_SIZE, CELL_SPACING, GRID_LEFT_PADDING},
     env::state::AppState,
     render::{
@@ -12,11 +19,18 @@ use crate::{
     utils::date::{calculate_weeks, get_year_range},
 };
 
-pub async fn render_farm_service(
+async fn fetch_data(
     user_name: &str,
     year: i32,
     state: AppState,
-) -> Result<String, Box<dyn std::error::Error>> {
+) -> Result<
+    (
+        HashMap<String, u32>,
+        Result<User, Vec<GithubGraphQLError>>,
+        Vec<crate::api::languages::MostUsedLanguage>,
+    ),
+    Box<dyn std::error::Error>,
+> {
     let commits = task::spawn({
         let user_name = user_name.to_string();
 
@@ -52,6 +66,16 @@ pub async fn render_farm_service(
             vec![]
         }
     };
+
+    Ok((commits, stats, most_used_languages))
+}
+
+pub async fn render_farm_service(
+    user_name: &str,
+    year: i32,
+    state: AppState,
+) -> Result<String, Box<dyn std::error::Error>> {
+    let (commits, stats, most_used_languages) = fetch_data(user_name, year, state).await?;
 
     let (start_date, end_date) = get_year_range(year).unwrap();
     let weeks = calculate_weeks(start_date, end_date);
