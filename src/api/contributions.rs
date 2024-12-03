@@ -4,7 +4,7 @@ use tl::{parse, ParserOptions};
 fn parse_commit_from_string(
     data: &str,
 ) -> Result<HashMap<String, u32>, Box<dyn std::error::Error>> {
-    let mut commits_by_day = HashMap::new();
+    let mut commits_by_day = HashMap::with_capacity(366);
     let document = parse(data, ParserOptions::default()).unwrap();
     let nodes = document
         .nodes()
