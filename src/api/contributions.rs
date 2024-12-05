@@ -16,7 +16,7 @@ fn parse_commit_from_string(
 
     document
         .nodes()
-        .into_iter()
+        .iter()
         .filter_map(|node| node.as_tag())
         .filter(|tag| tag.name() == "td")
         .for_each(|td| {
