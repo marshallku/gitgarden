@@ -1,41 +1,38 @@
 use std::{collections::HashMap, time::Instant};
-use tl::{parse, ParserOptions};
+use tl::{parse, Attributes, ParserOptions};
+
+fn parse_attribute_to_utf8_str<'a>(attributes: &'a Attributes, key: &'a str) -> Option<&'a str> {
+    attributes
+        .get(key)
+        .flatten()
+        .and_then(|value| value.try_as_utf8_str())
+}
 
 fn parse_commit_from_string(
     data: &str,
 ) -> Result<HashMap<String, u32>, Box<dyn std::error::Error>> {
     let mut commits_by_day = HashMap::with_capacity(366);
     let document = parse(data, ParserOptions::default())?;
-    let nodes = document
+
+    document
         .nodes()
-        .iter()
-        .filter(|node| node.as_tag().map_or(false, |tag| tag.name() == "td"));
+        .into_iter()
+        .filter_map(|node| node.as_tag())
+        .filter(|tag| tag.name() == "td")
+        .for_each(|td| {
+            let attributes = td.attributes();
 
-    for td in nodes {
-        let td = td.as_tag().unwrap();
-
-        let attributes = td.attributes();
-
-        let date = attributes
-            .get("data-date")
-            .flatten()
-            .and_then(|date| date.try_as_utf8_str());
-        let level = attributes
-            .get("data-level")
-            .flatten()
-            .and_then(|level| level.try_as_utf8_str());
-
-        match (date, level) {
-            (Some(date), Some(level)) => {
+            if let (Some(date), Some(level)) = (
+                parse_attribute_to_utf8_str(&attributes, "data-date"),
+                parse_attribute_to_utf8_str(&attributes, "data-level"),
+            ) {
                 if let Ok(level) = level.parse::<u32>() {
                     if level > 0 {
                         commits_by_day.insert(date.to_string(), level);
                     }
                 }
             }
-            _ => continue,
-        }
-    }
+        });
 
     Ok(commits_by_day)
 }
