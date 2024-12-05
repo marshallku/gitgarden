@@ -23,8 +23,8 @@ fn parse_commit_from_string(
             let attributes = td.attributes();
 
             if let (Some(date), Some(level)) = (
-                parse_attribute_to_utf8_str(&attributes, "data-date"),
-                parse_attribute_to_utf8_str(&attributes, "data-level"),
+                parse_attribute_to_utf8_str(attributes, "data-date"),
+                parse_attribute_to_utf8_str(attributes, "data-level"),
             ) {
                 if let Ok(level) = level.parse::<u32>() {
                     if level > 0 {
