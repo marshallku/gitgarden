@@ -55,7 +55,7 @@ pub async fn get(
             headers.insert("Access-Control-Allow-Origin", origin.parse().unwrap());
             headers.insert("X-Content-Type-Options", "nosniff".parse().unwrap());
 
-            return (StatusCode::OK, headers, svg);
+            (StatusCode::OK, headers, svg)
         }
         Err(e) => {
             let mut headers = get_cache_header("0");
@@ -63,7 +63,7 @@ pub async fn get(
             headers.insert("Access-Control-Allow-Origin", origin.parse().unwrap());
             headers.insert("X-Content-Type-Options", "nosniff".parse().unwrap());
 
-            return (StatusCode::INTERNAL_SERVER_ERROR, headers, e.to_string());
+            (StatusCode::INTERNAL_SERVER_ERROR, headers, e.to_string())
         }
     }
 }
