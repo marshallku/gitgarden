@@ -73,7 +73,7 @@ impl Farm {
                 .collect::<String>()
         );
 
-        svg.replace('\n', "")
+        svg
     }
 
     fn register_masks(&self) -> String {

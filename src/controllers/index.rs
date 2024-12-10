@@ -9,7 +9,7 @@ use serde::Deserialize;
 use crate::{
     env::state::AppState,
     services::{render_farm::render_farm_service, render_page::render_page_service},
-    utils::{extractor::ExtractFullOrigin, http::get_cache_header},
+    utils::{extractor::ExtractFullOrigin, http::get_cache_header, string::minify_xml},
 };
 
 #[derive(Deserialize)]
@@ -55,7 +55,7 @@ pub async fn get(
             headers.insert("Access-Control-Allow-Origin", origin.parse().unwrap());
             headers.insert("X-Content-Type-Options", "nosniff".parse().unwrap());
 
-            (StatusCode::OK, headers, svg)
+            (StatusCode::OK, headers, minify_xml(&svg))
         }
         Err(e) => {
             let mut headers = get_cache_header("0");
