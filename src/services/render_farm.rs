@@ -16,7 +16,7 @@ use crate::{
         contribution_cells::ContributionCells, farm::Farm, grasses::Grasses, home::Home,
         trees::Trees,
     },
-    utils::date::{calculate_weeks, get_year_range},
+    utils::date::{calculate_day_passed_in_year, calculate_weeks, get_year_range},
 };
 
 async fn fetch_data(
@@ -84,8 +84,8 @@ pub async fn render_farm_service(
     let height = 465;
 
     let mut farm = Farm::new(width, height);
-    // length of key of commits / (365 / 2) * 100, upper bound 100
-    let progress = (commits.len() as f32 / 182.5 * 100.0).min(100.0);
+    let progress =
+        (commits.len() as f32 / (calculate_day_passed_in_year(year) / 2.0) * 100.0).min(100.0);
 
     let home = Home::new(user_name);
 
