@@ -15,6 +15,6 @@ pub fn encode_from_path(path: &str) -> String {
         );
         String::new()
     } else {
-        general_purpose::STANDARD_NO_PAD.encode(file.unwrap())
+        general_purpose::STANDARD_NO_PAD.encode(file.unwrap_or_default())
     }
 }

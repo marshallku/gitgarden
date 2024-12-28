@@ -1,4 +1,4 @@
-use axum::http::HeaderMap;
+use axum::http::{HeaderMap, HeaderValue};
 use chrono::{Duration, Utc};
 
 use crate::constants::date::{
@@ -24,8 +24,14 @@ pub fn get_cache_header(age: &str) -> HeaderMap {
         expires.to_rfc2822()
     };
 
-    headers.insert("Cache-Control", cache_age.parse().unwrap());
-    headers.insert("Expires", expires.parse().unwrap());
+    headers.insert(
+        "Cache-Control",
+        cache_age.parse().unwrap_or(HeaderValue::from_static("0")),
+    );
+    headers.insert(
+        "Expires",
+        expires.parse().unwrap_or(HeaderValue::from_static("0")),
+    );
 
     headers
 }

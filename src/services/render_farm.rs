@@ -77,7 +77,13 @@ pub async fn render_farm_service(
 ) -> Result<String, Box<dyn std::error::Error>> {
     let (commits, stats, most_used_languages) = fetch_data(user_name, year, state).await?;
 
-    let (start_date, end_date) = get_year_range(year).unwrap();
+    let (start_date, end_date) = match get_year_range(year) {
+        Some((start_date, end_date)) => (start_date, end_date),
+        None => {
+            error!("Failed to get year range");
+            return Err("Failed to get year range".into());
+        }
+    };
     let weeks = calculate_weeks(start_date, end_date);
 
     let width = weeks as u32 * (CELL_SIZE + CELL_SPACING) + GRID_LEFT_PADDING * 2;

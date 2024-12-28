@@ -18,7 +18,7 @@ where
             parts
                 .headers
                 .get("x-forwarded-proto")
-                .map(|v| v.to_str().unwrap())
+                .map(|v| v.to_str().unwrap_or("http"))
                 .unwrap_or("http"),
         );
         let host = parts.uri.host().unwrap_or(
@@ -26,7 +26,7 @@ where
                 .headers
                 .get("host")
                 .or(parts.headers.get("x-forwarded-host"))
-                .map(|v| v.to_str().unwrap())
+                .map(|v| v.to_str().unwrap_or("localhost"))
                 .unwrap_or("localhost"),
         );
         let port = if host.contains(':') {
@@ -38,10 +38,10 @@ where
                     parts
                         .headers
                         .get("x-forwarded-port")
-                        .map(|v| v.to_str().unwrap())
+                        .map(|v| v.to_str().unwrap_or("80"))
                         .unwrap_or("80")
                         .parse()
-                        .unwrap(),
+                        .unwrap_or(80),
                 )
             )
         };

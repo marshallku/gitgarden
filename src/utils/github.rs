@@ -1,3 +1,4 @@
+use axum::http::HeaderValue;
 use reqwest::{
     header::{HeaderMap, HeaderName, ACCEPT, AUTHORIZATION, USER_AGENT},
     Client, Error,
@@ -14,14 +15,17 @@ pub async fn github_graphql_request(
     let client = Client::new();
 
     let mut request_headers = HeaderMap::new();
-    request_headers.insert(AUTHORIZATION, format!("token {}", token).parse().unwrap());
-    request_headers.insert(ACCEPT, "*/*".parse().unwrap());
-    request_headers.insert(USER_AGENT, "reqwest".parse().unwrap());
+    request_headers.insert(
+        AUTHORIZATION,
+        format!("token {}", token).parse().unwrap_or(HeaderValue::from_static("")),
+    );
+    request_headers.insert(ACCEPT, "*/*".parse().unwrap_or(HeaderValue::from_static("")));
+    request_headers.insert(USER_AGENT, "reqwest".parse().unwrap_or(HeaderValue::from_static("")));
 
     for (key, value) in headers {
         request_headers.insert(
-            HeaderName::from_bytes(key.as_bytes()).unwrap(),
-            value.parse().unwrap(),
+            HeaderName::from_bytes(key.as_bytes()).unwrap_or(HeaderName::from_static("")),
+            value.parse().unwrap_or(HeaderValue::from_static("")),
         );
     }
 
