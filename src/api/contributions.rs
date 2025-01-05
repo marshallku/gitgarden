@@ -37,10 +37,7 @@ fn parse_commit_from_string(
     Ok(commits_by_day)
 }
 
-pub async fn get_daily_commits(
-    user_name: &str,
-    year: i32,
-) -> Result<HashMap<String, u32>, Box<dyn std::error::Error>> {
+pub async fn get_daily_commits(user_name: &str, year: i32) -> Result<HashMap<String, u32>, String> {
     let from = format!("{}-01-01", year);
     let to = format!("{}-12-31", year);
     let query = format!("?from={}&to={}", from, to);
@@ -49,9 +46,28 @@ pub async fn get_daily_commits(
         user_name, query
     );
 
-    let response = reqwest::get(&url).await?.text().await?;
+    let response = match reqwest::get(&url).await {
+        Ok(response) => response,
+        Err(error) => {
+            println!("Error: {:?}", error);
+            return Err(error.to_string());
+        }
+    };
+    let body = match response.text().await {
+        Ok(body) => body,
+        Err(error) => {
+            println!("Error: {:?}", error);
+            return Err(error.to_string());
+        }
+    };
     let start = Instant::now();
-    let commits = parse_commit_from_string(&response)?;
+    let commits = match parse_commit_from_string(&body) {
+        Ok(commits) => commits,
+        Err(error) => {
+            println!("Error: {:?}", error);
+            return Err(error.to_string());
+        }
+    };
     let duration = start.elapsed();
     println!("Parsing took: {:?}", duration);
 

@@ -34,7 +34,7 @@ async fn fetch_data(
     let commits = task::spawn({
         let user_name = user_name.to_string();
 
-        async move { get_daily_commits(&user_name, year).await.unwrap() }
+        async move { get_daily_commits(&user_name, year).await }
     });
     let most_used_languages = task::spawn({
         let user_name = user_name.to_string();
@@ -57,7 +57,13 @@ async fn fetch_data(
         }
     });
 
-    let commits = commits.await?;
+    let commits = match commits.await? {
+        Ok(commits) => commits,
+        Err(error) => {
+            error!("Failed to get daily commits: {:?}", error);
+            HashMap::with_capacity(0)
+        }
+    };
     let stats = stats.await?;
     let most_used_languages = match most_used_languages.await? {
         Ok(languages) => languages,
