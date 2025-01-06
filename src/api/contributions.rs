@@ -1,4 +1,4 @@
-use std::{collections::HashMap, time::Instant};
+use std::collections::HashMap;
 use tl::{parse, Attributes, ParserOptions};
 
 fn parse_attribute_to_utf8_str<'a>(attributes: &'a Attributes, key: &'a str) -> Option<&'a str> {
@@ -60,7 +60,6 @@ pub async fn get_daily_commits(user_name: &str, year: i32) -> Result<HashMap<Str
             return Err(error.to_string());
         }
     };
-    let start = Instant::now();
     let commits = match parse_commit_from_string(&body) {
         Ok(commits) => commits,
         Err(error) => {
@@ -68,8 +67,6 @@ pub async fn get_daily_commits(user_name: &str, year: i32) -> Result<HashMap<Str
             return Err(error.to_string());
         }
     };
-    let duration = start.elapsed();
-    println!("Parsing took: {:?}", duration);
 
     Ok(commits)
 }
