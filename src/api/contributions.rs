@@ -46,27 +46,12 @@ pub async fn get_daily_commits(user_name: &str, year: i32) -> Result<HashMap<Str
         user_name, query
     );
 
-    let response = match reqwest::get(&url).await {
-        Ok(response) => response,
-        Err(error) => {
-            println!("Error: {:?}", error);
-            return Err(error.to_string());
-        }
-    };
-    let body = match response.text().await {
-        Ok(body) => body,
-        Err(error) => {
-            println!("Error: {:?}", error);
-            return Err(error.to_string());
-        }
-    };
-    let commits = match parse_commit_from_string(&body) {
-        Ok(commits) => commits,
-        Err(error) => {
-            println!("Error: {:?}", error);
-            return Err(error.to_string());
-        }
-    };
+    let response = reqwest::get(&url)
+        .await
+        .map_err(|e| e.to_string())?
+        .text()
+        .await
+        .map_err(|e| e.to_string())?;
 
-    Ok(commits)
+    parse_commit_from_string(&response).map_err(|e| e.to_string())
 }
