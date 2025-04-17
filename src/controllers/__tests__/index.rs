@@ -7,7 +7,7 @@ mod tests {
         routing::get,
         Router,
     };
-    use tower::ServiceExt;
+    use tower::util::ServiceExt;
 
     use crate::{controllers::index, env::state::AppState};
 
