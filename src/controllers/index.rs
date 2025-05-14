@@ -50,7 +50,7 @@ pub async fn get(
                 "Content-Disposition",
                 format!("inline; filename=\"{}-gitgarden-{}.svg\"", user_name, year)
                     .parse()
-                    .unwrap(),
+                    .unwrap_or_else(|_| "inline; filename=\"gitgarden.svg\"".parse().unwrap()),
             );
             headers.insert("Access-Control-Allow-Origin", origin.parse().unwrap());
             headers.insert("X-Content-Type-Options", "nosniff".parse().unwrap());
