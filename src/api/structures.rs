@@ -6,7 +6,7 @@ pub struct GithubGraphQLResponse<T> {
     pub errors: Option<Vec<GithubGraphQLError>>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct GithubGraphQLError {
     #[serde(rename = "type")]
     pub error_type: String,
@@ -15,7 +15,7 @@ pub struct GithubGraphQLError {
     pub message: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Location {
     pub line: i32,
     pub column: i32,

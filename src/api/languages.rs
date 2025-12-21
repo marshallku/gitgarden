@@ -8,11 +8,6 @@ use crate::utils::github::github_graphql_request;
 use super::structures::{GithubGraphQLError, GithubGraphQLResponse};
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct Root {
-    pub data: LanguageData,
-}
-
-#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct LanguageData {
     pub user: Option<User>,
 }
@@ -59,7 +54,6 @@ pub struct MostUsedLanguage {
     pub percentage: f32,
 }
 
-#[allow(dead_code)]
 pub async fn get_most_used_languages(
     user_name: &str,
     year: i32,

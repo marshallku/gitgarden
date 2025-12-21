@@ -1,11 +1,18 @@
+use std::sync::Arc;
+use std::time::Duration;
+
 use super::app::Env;
+use crate::cache::GithubCache;
 use dotenv::dotenv;
+
+const CACHE_TTL_SECS: u64 = 3600; // 1 hour
 
 #[derive(Clone)]
 pub struct AppState {
     pub host: String,
     pub port: u16,
     pub token: String,
+    pub cache: Arc<GithubCache>,
 }
 
 impl AppState {
@@ -18,6 +25,7 @@ impl AppState {
             host: env.host.into_owned(),
             port: env.port,
             token: env.token.into_owned(),
+            cache: Arc::new(GithubCache::new(Duration::from_secs(CACHE_TTL_SECS))),
         }
     }
 }

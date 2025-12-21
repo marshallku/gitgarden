@@ -9,6 +9,7 @@ use tracing::{info, Level};
 use utils::log::trace_layer_on_request;
 
 mod api;
+mod cache;
 mod constants;
 mod controllers;
 mod env;

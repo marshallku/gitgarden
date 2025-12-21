@@ -10,6 +10,7 @@ use crate::{
         stats::{get_stats, User},
         structures::GithubGraphQLError,
     },
+    cache::CachedUserData,
     constants::render::{CELL_SIZE, CELL_SPACING, GRID_LEFT_PADDING},
     env::state::AppState,
     render::{
@@ -31,6 +32,10 @@ async fn fetch_data(
     ),
     Box<dyn std::error::Error>,
 > {
+    if let Some(cached) = state.cache.get(user_name, year).await {
+        return Ok((cached.commits, cached.stats, cached.languages));
+    }
+
     let commits = task::spawn({
         let user_name = user_name.to_string();
 
@@ -72,6 +77,12 @@ async fn fetch_data(
             vec![]
         }
     };
+
+    state.cache.set(user_name, year, CachedUserData {
+        commits: commits.clone(),
+        languages: most_used_languages.clone(),
+        stats: stats.clone(),
+    }).await;
 
     Ok((commits, stats, most_used_languages))
 }
