@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-use tokio::task;
-use tracing::error;
+use tokio::{spawn, task};
+use tracing::{error, info};
 
 use crate::{
     api::{
@@ -20,6 +20,66 @@ use crate::{
     utils::date::{calculate_day_passed_in_year, calculate_weeks, get_year_range},
 };
 
+async fn get_data(
+    user_name: &str,
+    year: i32,
+    state: AppState,
+) -> Result<
+    (
+        HashMap<String, u32>,
+        Result<User, Vec<GithubGraphQLError>>,
+        Vec<crate::api::languages::MostUsedLanguage>,
+    ),
+    Box<dyn std::error::Error + Send + Sync>,
+> {
+    if let Some(cached) = state.cache.get(user_name, year).await {
+        let user = user_name.to_string();
+        let state_clone = state.clone();
+
+        spawn(async move {
+            if let Ok((commits, stats, languages)) =
+                fetch_data(&user, year, state_clone.clone()).await
+            {
+                info!("Cached data updated for user in background: {}", user);
+                state_clone
+                    .cache
+                    .set(
+                        &user,
+                        year,
+                        CachedUserData {
+                            commits,
+                            languages,
+                            stats,
+                        },
+                    )
+                    .await;
+            }
+        });
+
+        info!("Cached data found for user: {}", user_name);
+        return Ok((cached.commits, cached.stats, cached.languages));
+    }
+
+    let (commits, stats, most_used_languages) = fetch_data(user_name, year, state.clone()).await?;
+
+    state
+        .clone()
+        .cache
+        .set(
+            user_name,
+            year,
+            CachedUserData {
+                commits: commits.clone(),
+                languages: most_used_languages.clone(),
+                stats: stats.clone(),
+            },
+        )
+        .await;
+
+    info!("Response without cached data for user: {}", user_name);
+    Ok((commits, stats, most_used_languages))
+}
+
 async fn fetch_data(
     user_name: &str,
     year: i32,
@@ -30,12 +90,8 @@ async fn fetch_data(
         Result<User, Vec<GithubGraphQLError>>,
         Vec<crate::api::languages::MostUsedLanguage>,
     ),
-    Box<dyn std::error::Error>,
+    Box<dyn std::error::Error + Send + Sync>,
 > {
-    if let Some(cached) = state.cache.get(user_name, year).await {
-        return Ok((cached.commits, cached.stats, cached.languages));
-    }
-
     let commits = task::spawn({
         let user_name = user_name.to_string();
 
@@ -78,12 +134,6 @@ async fn fetch_data(
         }
     };
 
-    state.cache.set(user_name, year, CachedUserData {
-        commits: commits.clone(),
-        languages: most_used_languages.clone(),
-        stats: stats.clone(),
-    }).await;
-
     Ok((commits, stats, most_used_languages))
 }
 
@@ -91,8 +141,8 @@ pub async fn render_farm_service(
     user_name: &str,
     year: i32,
     state: AppState,
-) -> Result<String, Box<dyn std::error::Error>> {
-    let (commits, stats, most_used_languages) = fetch_data(user_name, year, state).await?;
+) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+    let (commits, stats, most_used_languages) = get_data(user_name, year, state).await?;
 
     let (start_date, end_date) = match get_year_range(year) {
         Some((start_date, end_date)) => (start_date, end_date),
