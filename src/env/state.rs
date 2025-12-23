@@ -5,7 +5,7 @@ use super::app::Env;
 use crate::cache::GithubCache;
 use dotenv::dotenv;
 
-const CACHE_TTL_SECS: u64 = 3600; // 1 hour
+const CACHE_TTL_SECS: u64 = 3 * 60 * 60;
 
 #[derive(Clone)]
 pub struct AppState {
