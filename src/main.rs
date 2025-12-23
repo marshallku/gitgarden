@@ -1,5 +1,3 @@
-use std::{fs::File, io::Write};
-
 use axum::serve;
 use controllers::app::app;
 use env::state::AppState;
@@ -67,7 +65,5 @@ async fn handle_shutdown() {
         _ = terminate => {},
     }
 
-    // Create file
-    let mut file = File::create("shutdown.txt").unwrap();
-    file.write_all(b"Shutdown signal received").unwrap();
+    info!("Shutting down...");
 }
