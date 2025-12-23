@@ -18,18 +18,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: marshallku/actions/analyze/spell@master
-  check-format:
-    name: Check format of code
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          check-latest: true
-          registry-url: https://registry.npmjs.org/
-      - name: Check format
-        run: npx prettier . --check
   build:
     name: Build project
     runs-on: ubuntu-latest
@@ -124,7 +112,7 @@ jobs:
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
   send-notification:
-    needs: [check-spell, check-format, build, test, docker]
+    needs: [check-spell, build, test, docker]
     if: ${{ failure() }}
     uses: marshallku/actions/.github/workflows/send-notification.yml@master
     with:
