@@ -20,27 +20,27 @@ use crate::{
     utils::date::{calculate_day_passed_in_year, calculate_weeks, get_year_range},
 };
 
-async fn get_data(
-    user_name: &str,
-    year: i32,
-    state: AppState,
-) -> Result<
-    (
-        HashMap<String, u32>,
-        Result<User, Vec<GithubGraphQLError>>,
-        Vec<crate::api::languages::MostUsedLanguage>,
-        bool,
-    ),
-    Box<dyn std::error::Error + Send + Sync>,
-> {
+type FarmError = Box<dyn std::error::Error + Send + Sync>;
+
+struct FetchedData {
+    commits: HashMap<String, u32>,
+    stats: Result<User, Vec<GithubGraphQLError>>,
+    languages: Vec<MostUsedLanguage>,
+}
+
+struct UserData {
+    data: FetchedData,
+    is_cached: bool,
+}
+
+async fn get_data(user_name: &str, year: i32, state: AppState) -> Result<UserData, FarmError> {
     if let Some(cached) = state.cache.get(user_name, year).await {
         let user = user_name.to_string();
         let state_clone = state.clone();
 
         spawn(async move {
-            if let Ok((commits, stats, languages)) =
-                fetch_data(&user, year, state_clone.clone()).await
-            {
+            if let Ok(data) = fetch_data(&user, year, state_clone.clone()).await {
+                let FetchedData { commits, stats, languages } = data;
                 state_clone
                     .cache
                     .set(
@@ -56,10 +56,21 @@ async fn get_data(
             }
         });
 
-        return Ok((cached.commits, cached.stats, cached.languages, true));
+        return Ok(UserData {
+            data: FetchedData {
+                commits: cached.commits,
+                stats: cached.stats,
+                languages: cached.languages,
+            },
+            is_cached: true,
+        });
     }
 
-    let (commits, stats, most_used_languages) = fetch_data(user_name, year, state.clone()).await?;
+    let FetchedData {
+        commits,
+        stats,
+        languages: most_used_languages,
+    } = fetch_data(user_name, year, state.clone()).await?;
 
     state
         .clone()
@@ -75,21 +86,17 @@ async fn get_data(
         )
         .await;
 
-    Ok((commits, stats, most_used_languages, false))
+    Ok(UserData {
+        data: FetchedData {
+            commits,
+            stats,
+            languages: most_used_languages,
+        },
+        is_cached: false,
+    })
 }
 
-async fn fetch_data(
-    user_name: &str,
-    year: i32,
-    state: AppState,
-) -> Result<
-    (
-        HashMap<String, u32>,
-        Result<User, Vec<GithubGraphQLError>>,
-        Vec<crate::api::languages::MostUsedLanguage>,
-    ),
-    Box<dyn std::error::Error + Send + Sync>,
-> {
+async fn fetch_data(user_name: &str, year: i32, state: AppState) -> Result<FetchedData, FarmError> {
     let commits = task::spawn({
         let user_name = user_name.to_string();
 
@@ -132,7 +139,11 @@ async fn fetch_data(
         }
     };
 
-    Ok((commits, stats, most_used_languages))
+    Ok(FetchedData {
+        commits,
+        stats,
+        languages: most_used_languages,
+    })
 }
 
 pub async fn render_farm_service(
@@ -140,7 +151,10 @@ pub async fn render_farm_service(
     year: i32,
     state: AppState,
 ) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
-    let (commits, stats, most_used_languages, is_cached) = get_data(user_name, year, state).await?;
+    let UserData {
+        data: FetchedData { commits, stats, languages },
+        is_cached,
+    } = get_data(user_name, year, state).await?;
     info!("user = {}, cache = {}", user_name, is_cached);
 
     let (start_date, end_date) = match get_year_range(year) {
@@ -167,7 +181,7 @@ pub async fn render_farm_service(
         start_date,
         weeks,
         commits,
-        most_used_languages,
+        languages,
     ));
 
     if stats.is_ok() {
