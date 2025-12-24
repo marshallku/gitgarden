@@ -6,7 +6,7 @@ use tracing::{error, info};
 use crate::{
     api::{
         contributions::get_daily_commits,
-        languages::get_most_used_languages,
+        languages::{get_most_used_languages, MostUsedLanguage},
         stats::{get_stats, User},
         structures::GithubGraphQLError,
     },
@@ -29,6 +29,7 @@ async fn get_data(
         HashMap<String, u32>,
         Result<User, Vec<GithubGraphQLError>>,
         Vec<crate::api::languages::MostUsedLanguage>,
+        bool,
     ),
     Box<dyn std::error::Error + Send + Sync>,
 > {
@@ -40,7 +41,6 @@ async fn get_data(
             if let Ok((commits, stats, languages)) =
                 fetch_data(&user, year, state_clone.clone()).await
             {
-                info!("Cached data updated for user in background: {}", user);
                 state_clone
                     .cache
                     .set(
@@ -56,8 +56,7 @@ async fn get_data(
             }
         });
 
-        info!("Cached data found for user: {}", user_name);
-        return Ok((cached.commits, cached.stats, cached.languages));
+        return Ok((cached.commits, cached.stats, cached.languages, true));
     }
 
     let (commits, stats, most_used_languages) = fetch_data(user_name, year, state.clone()).await?;
@@ -76,8 +75,7 @@ async fn get_data(
         )
         .await;
 
-    info!("Response without cached data for user: {}", user_name);
-    Ok((commits, stats, most_used_languages))
+    Ok((commits, stats, most_used_languages, false))
 }
 
 async fn fetch_data(
@@ -142,7 +140,8 @@ pub async fn render_farm_service(
     year: i32,
     state: AppState,
 ) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
-    let (commits, stats, most_used_languages) = get_data(user_name, year, state).await?;
+    let (commits, stats, most_used_languages, is_cached) = get_data(user_name, year, state).await?;
+    info!("user = {}, cache = {}", user_name, is_cached);
 
     let (start_date, end_date) = match get_year_range(year) {
         Some((start_date, end_date)) => (start_date, end_date),
