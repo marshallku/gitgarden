@@ -1,2 +1,2 @@
-pub mod render_farm;
-pub mod render_page;
+pub mod farm;
+pub mod page;

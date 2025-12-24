@@ -1,6 +1,6 @@
 use chrono::Datelike;
 
-pub async fn render_page_service() -> String {
+pub async fn render_page() -> String {
     let current_year = chrono::Local::now().year();
     let template = r##"
 <!DOCTYPE html>

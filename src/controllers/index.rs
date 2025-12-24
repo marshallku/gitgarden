@@ -8,7 +8,7 @@ use serde::Deserialize;
 
 use crate::{
     env::state::AppState,
-    services::{render_farm::render_farm_service, render_page::render_page_service},
+    services::{farm::render::render_farm, page::render::render_page},
     utils::{extractor::ExtractFullOrigin, http::get_cache_header, string::minify_xml},
 };
 
@@ -25,7 +25,7 @@ pub async fn get(
 ) -> impl IntoResponse {
     if user_name.is_none() {
         let mut headers = get_cache_header("1h");
-        let rendered_page = render_page_service().await;
+        let rendered_page = render_page().await;
 
         headers.insert("Content-Type", "text/html".parse().unwrap());
 
@@ -34,7 +34,7 @@ pub async fn get(
 
     let user_name = user_name.unwrap();
     let year = year.unwrap_or_else(|| chrono::Local::now().year());
-    let rendered_svg = render_farm_service(&user_name, year, state).await;
+    let rendered_svg = render_farm(&user_name, year, state).await;
 
     match rendered_svg {
         Ok(svg) => {
