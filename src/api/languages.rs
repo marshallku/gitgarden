@@ -82,13 +82,23 @@ pub async fn get_most_used_languages(
         }
     };
 
-    let response: GithubGraphQLResponse<LanguageData> = serde_json::from_value(response).unwrap();
-
-    let response = match response {
-        GithubGraphQLResponse {
-            data: Some(data),
-            errors: None,
-        } => data.user.unwrap(),
+    let parsed_response: Result<GithubGraphQLResponse<LanguageData>, _> =
+        serde_json::from_value(response);
+    let user_data = match parsed_response {
+        Ok(response) => match response {
+            GithubGraphQLResponse {
+                data: Some(data),
+                errors: None,
+            } => data.user.unwrap(),
+            _ => {
+                return Err(vec![GithubGraphQLError {
+                    error_type: "ResponseError".to_string(),
+                    locations: vec![],
+                    message: "Unexpected response".to_string(),
+                    path: vec![],
+                }])
+            }
+        },
         _ => {
             return Err(vec![GithubGraphQLError {
                 error_type: "ResponseError".to_string(),
@@ -99,7 +109,7 @@ pub async fn get_most_used_languages(
         }
     };
 
-    let nodes = response.repositories.nodes;
+    let nodes = user_data.repositories.nodes;
     let mut language_totals: HashMap<String, i32> = HashMap::new();
     let mut total_size = 0;
 
