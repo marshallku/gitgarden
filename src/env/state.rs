@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use super::app::Env;
 use crate::cache::GithubCache;
-use dotenv::dotenv;
+use dotenvy::dotenv;
 
 const CACHE_TTL_SECS: u64 = 3 * 24 * 60 * 60;
 

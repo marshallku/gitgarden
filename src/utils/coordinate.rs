@@ -54,7 +54,7 @@ pub fn generate_coordinate<T: Hash>(
         }
     }
 
-    log::error!("Failed to generate a coordinate.");
+    tracing::error!("Failed to generate a coordinate.");
 
     None
 }
