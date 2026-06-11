@@ -1,4 +1,4 @@
-FROM rust:1.80-alpine AS base
+FROM rust:1.96-alpine AS base
 
 WORKDIR /usr/src/gitgarden
 
@@ -20,7 +20,7 @@ FROM base AS builder
 COPY src src
 RUN cargo build --release
 
-FROM alpine:3.20.2
+FROM alpine:3.24
 
 WORKDIR /usr/local/bin
 
