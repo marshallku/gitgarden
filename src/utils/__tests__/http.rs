@@ -5,7 +5,7 @@ mod tests {
             DAY_TO_SECONDS, HOUR_TO_SECONDS, MINUTE_TO_SECONDS, MONTH_TO_SECONDS, WEEK_TO_SECONDS,
             YEAR_TO_SECONDS,
         },
-        utils::http::parse_age,
+        utils::http::{get_cache_header, parse_age},
     };
 
     #[test]
@@ -40,6 +40,25 @@ mod tests {
         assert_eq!(parse_age("abc"), Err("Invalid number"));
         assert_eq!(parse_age("-1s"), Err("Invalid number"));
         assert_eq!(parse_age("18446744073709551616s"), Err("Invalid number"));
+    }
+
+    #[test]
+    fn test_cache_header_max_age_in_seconds() {
+        let headers = get_cache_header("1h");
+
+        assert_eq!(
+            headers.get("Cache-Control").unwrap(),
+            &format!("public, max-age={}", HOUR_TO_SECONDS)
+        );
+        assert!(headers.contains_key("Expires"));
+    }
+
+    #[test]
+    fn test_cache_header_no_cache() {
+        let headers = get_cache_header("0");
+
+        assert_eq!(headers.get("Cache-Control").unwrap(), "no-cache");
+        assert_eq!(headers.get("Expires").unwrap(), "0");
     }
 
     #[test]

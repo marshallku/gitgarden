@@ -13,7 +13,7 @@ pub fn get_cache_header(age: &str) -> HeaderMap {
     let cache_age = if parsed_age == 0 {
         "no-cache".to_string()
     } else {
-        format!("public, max-age={}", age)
+        format!("public, max-age={}", parsed_age)
     };
 
     let expires = if parsed_age == 0 {
