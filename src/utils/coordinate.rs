@@ -1,4 +1,4 @@
-use rand::{Rng, SeedableRng};
+use rand::{RngExt, SeedableRng};
 use rand_chacha::ChaCha8Rng;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
@@ -42,8 +42,8 @@ pub fn generate_coordinate<T: Hash>(
     let mut rng = ChaCha8Rng::seed_from_u64(seed);
 
     for _ in 0..MAX_RETRY {
-        let x = rng.gen_range(x_range.0..x_range.1);
-        let y = rng.gen_range(y_range.0..y_range.1);
+        let x = rng.random_range(x_range.0..x_range.1);
+        let y = rng.random_range(y_range.0..y_range.1);
 
         if let Some(zones) = dead_zone {
             if !is_in_rectangle(x, y, zones) {
