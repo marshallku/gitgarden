@@ -1,12 +1,10 @@
 use axum::{
-    async_trait,
     extract::FromRequestParts,
     http::{request::Parts, StatusCode},
 };
 
 pub struct ExtractFullOrigin(pub String);
 
-#[async_trait]
 impl<S> FromRequestParts<S> for ExtractFullOrigin
 where
     S: Send + Sync,
