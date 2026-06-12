@@ -77,7 +77,10 @@ mod tests {
     async fn test_revalidation_requires_existing_entry() {
         let cache = cache();
 
-        assert!(cache.try_begin_revalidation("missing", 2026).await.is_none());
+        assert!(cache
+            .try_begin_revalidation("missing", 2026)
+            .await
+            .is_none());
     }
 
     #[tokio::test]

@@ -6,11 +6,7 @@ use std::time::{Duration, Instant};
 
 use tokio::sync::RwLock;
 
-use crate::api::{
-    languages::MostUsedLanguage,
-    stats::User,
-    structures::GithubGraphQLError,
-};
+use crate::api::{languages::MostUsedLanguage, stats::User, structures::GithubGraphQLError};
 
 /// Minimum gap between background revalidation attempts for the same key,
 /// so upstream outages degrade to one retry per minute instead of one per request.

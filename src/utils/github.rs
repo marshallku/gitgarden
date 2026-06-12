@@ -16,10 +16,18 @@ pub async fn github_graphql_request(
     let mut request_headers = HeaderMap::new();
     request_headers.insert(
         AUTHORIZATION,
-        format!("token {}", token).parse().unwrap_or(HeaderValue::from_static("")),
+        format!("token {}", token)
+            .parse()
+            .unwrap_or(HeaderValue::from_static("")),
     );
-    request_headers.insert(ACCEPT, "*/*".parse().unwrap_or(HeaderValue::from_static("")));
-    request_headers.insert(USER_AGENT, "reqwest".parse().unwrap_or(HeaderValue::from_static("")));
+    request_headers.insert(
+        ACCEPT,
+        "*/*".parse().unwrap_or(HeaderValue::from_static("")),
+    );
+    request_headers.insert(
+        USER_AGENT,
+        "reqwest".parse().unwrap_or(HeaderValue::from_static("")),
+    );
 
     for (key, value) in headers {
         request_headers.insert(

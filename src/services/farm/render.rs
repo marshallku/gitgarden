@@ -49,9 +49,7 @@ pub async fn render_farm(
         year, start_date, weeks, commits, languages,
     ));
 
-    if stats.is_ok() {
-        let stats = stats.unwrap();
-
+    if let Ok(stats) = stats {
         farm.add_object(Grasses::new(
             user_name,
             width,

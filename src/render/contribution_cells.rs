@@ -64,7 +64,7 @@ impl Renderable for ContributionCells {
                     r##"<use x="{}" y="{}" xlink:href="#{}" />"##,
                     x_coord,
                     y_coord,
-                    Objects::Dirt.to_string()
+                    Objects::Dirt
                 )
                 .unwrap();
 
@@ -79,22 +79,22 @@ impl Renderable for ContributionCells {
                     write!(
                         cells,
                         r##"<use x="{}" y="{}" xlink:href="#{}" />"##,
-                        x_coord,
-                        y_coord,
-                        flower.to_string()
+                        x_coord, y_coord, flower
                     )
                     .unwrap();
 
-                    if most_used_language.is_some() && flower.get_mask_id().is_some() {
+                    if let (Some(language), Some(mask_id)) =
+                        (most_used_language, flower.get_mask_id())
+                    {
                         write!(
                             cells,
                             r##"<rect mask="url(#{})" x="{}" y="{}" width="{}" height="{}" fill="{}" class="{}" />"##,
-                            flower.get_mask_id().unwrap(),
+                            mask_id,
                             x_coord,
                             y_coord,
                             CELL_SIZE,
                             CELL_SIZE,
-                            most_used_language.unwrap().color,
+                            language.color,
                             MASK_CLASS
                         ).unwrap();
                     }

@@ -105,7 +105,11 @@ async fn revalidate_in_background(user_name: &str, year: i32, state: AppState) {
     });
 }
 
-async fn fetch_data(user_name: &str, year: i32, state: AppState) -> Result<FetchOutcome, FarmError> {
+async fn fetch_data(
+    user_name: &str,
+    year: i32,
+    state: AppState,
+) -> Result<FetchOutcome, FarmError> {
     let commits = task::spawn({
         let client = state.http.clone();
         let user_name = user_name.to_string();

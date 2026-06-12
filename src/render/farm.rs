@@ -107,10 +107,7 @@ impl Farm {
             write!(
                 acc,
                 r#"<image id="{}" width="{}" height="{}" xlink:href="data:image/png;base64,{}" />"#,
-                object.to_string(),
-                width,
-                height,
-                encoded
+                object, width, height, encoded
             )
             .expect("Writing to string should not fail");
 

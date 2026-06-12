@@ -5,7 +5,9 @@ use serde_json::json;
 
 use crate::utils::github::github_graphql_request;
 
-use super::structures::{GithubGraphQLError, GithubGraphQLResponse, ERROR_TYPE_REQUEST, ERROR_TYPE_RESPONSE};
+use super::structures::{
+    GithubGraphQLError, GithubGraphQLResponse, ERROR_TYPE_REQUEST, ERROR_TYPE_RESPONSE,
+};
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct LanguageData {

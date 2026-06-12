@@ -13,10 +13,10 @@ mod tests {
         assert_eq!(parse_age("30s"), Ok(30));
         assert_eq!(parse_age("5m"), Ok(5 * MINUTE_TO_SECONDS));
         assert_eq!(parse_age("2h"), Ok(2 * HOUR_TO_SECONDS));
-        assert_eq!(parse_age("1d"), Ok(1 * DAY_TO_SECONDS));
-        assert_eq!(parse_age("1w"), Ok(1 * WEEK_TO_SECONDS));
-        assert_eq!(parse_age("1M"), Ok(1 * MONTH_TO_SECONDS));
-        assert_eq!(parse_age("1y"), Ok(1 * YEAR_TO_SECONDS));
+        assert_eq!(parse_age("1d"), Ok(DAY_TO_SECONDS));
+        assert_eq!(parse_age("1w"), Ok(WEEK_TO_SECONDS));
+        assert_eq!(parse_age("1M"), Ok(MONTH_TO_SECONDS));
+        assert_eq!(parse_age("1y"), Ok(YEAR_TO_SECONDS));
 
         assert_eq!(parse_age("0s"), Ok(0));
         assert_eq!(parse_age("1s"), Ok(1));

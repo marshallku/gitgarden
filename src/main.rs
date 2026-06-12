@@ -48,9 +48,8 @@ async fn main() {
 
 fn spawn_cache_eviction(cache: std::sync::Arc<cache::GithubCache>) {
     tokio::spawn(async move {
-        let mut interval = tokio::time::interval(std::time::Duration::from_secs(
-            CACHE_EVICTION_INTERVAL_SECS,
-        ));
+        let mut interval =
+            tokio::time::interval(std::time::Duration::from_secs(CACHE_EVICTION_INTERVAL_SECS));
 
         loop {
             interval.tick().await;

@@ -7,8 +7,5 @@ pub struct HealthResponse {
 }
 
 pub async fn get() -> impl IntoResponse {
-    (
-        StatusCode::OK,
-        Json(HealthResponse { status: "healthy" }),
-    )
+    (StatusCode::OK, Json(HealthResponse { status: "healthy" }))
 }

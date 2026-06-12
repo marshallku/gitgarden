@@ -34,11 +34,11 @@ mod tests {
         let (x, y) = generate_coordinate("test", (0.0, 10.0), (-5.0, 5.0), None).unwrap();
 
         assert!(
-            x >= 0.0 && x < 10.0,
+            (0.0..10.0).contains(&x),
             "X should be within the specified range"
         );
         assert!(
-            y >= -5.0 && y < 5.0,
+            (-5.0..5.0).contains(&y),
             "Y should be within the specified range"
         );
     }
@@ -68,11 +68,11 @@ mod tests {
         assert!(x.is_finite(), "X should be finite even with large ranges");
         assert!(y.is_finite(), "Y should be finite even with large ranges");
         assert!(
-            x >= -1e300 && x < 1e300,
+            (-1e300..1e300).contains(&x),
             "X should be within the specified large range"
         );
         assert!(
-            y >= -1e300 && y < 1e300,
+            (-1e300..1e300).contains(&y),
             "Y should be within the specified large range"
         );
     }

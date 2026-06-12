@@ -23,7 +23,7 @@ mod tests {
         let cells = ContributionCells::new(year, start_date, weeks, commits, most_used_languages);
         let rendered = cells.render();
 
-        let object_id = format!("#{}", Objects::Dirt.to_string());
+        let object_id = format!("#{}", Objects::Dirt);
 
         assert_eq!(rendered.matches("<use").count(), 7);
         assert_eq!(rendered.matches(&object_id).count(), 7);

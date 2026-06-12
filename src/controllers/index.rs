@@ -42,7 +42,11 @@ pub async fn get(
 
         headers.insert("Content-Type", "text/plain".parse().unwrap());
 
-        return (StatusCode::BAD_REQUEST, headers, "Invalid user name".to_string());
+        return (
+            StatusCode::BAD_REQUEST,
+            headers,
+            "Invalid user name".to_string(),
+        );
     }
 
     let year = year.unwrap_or_else(|| chrono::Local::now().year());

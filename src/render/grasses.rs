@@ -76,9 +76,7 @@ impl Renderable for Grasses {
                     );
                     format!(
                         r##"<use x="{}" y="{}" xlink:href="#{}" />"##,
-                        x,
-                        y,
-                        grass_type.to_string()
+                        x, y, grass_type
                     )
                 })
             })

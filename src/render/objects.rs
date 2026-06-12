@@ -15,26 +15,30 @@ pub enum Objects {
     Dirt,
 }
 
-impl Objects {
-    pub fn to_string(&self) -> String {
-        match self {
-            Objects::FlowerOne => "flower-1".to_string(),
-            Objects::FlowerTwo => "flower-2".to_string(),
-            Objects::FlowerThree => "flower-3".to_string(),
-            Objects::FlowerFour => "flower-4".to_string(),
-            Objects::TreeOne => "tree-1".to_string(),
-            Objects::TreeTwo => "tree-2".to_string(),
-            Objects::GrassOne => "grass-1".to_string(),
-            Objects::GrassTwo => "grass-2".to_string(),
-            Objects::GrassThree => "grass-3".to_string(),
-            Objects::GrassFour => "grass-4".to_string(),
-            Objects::GrassFive => "grass-5".to_string(),
-            Objects::GrassSix => "grass-6".to_string(),
-            Objects::Dirt => "dirt".to_string(),
-        }
-    }
+impl std::fmt::Display for Objects {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let name = match self {
+            Objects::FlowerOne => "flower-1",
+            Objects::FlowerTwo => "flower-2",
+            Objects::FlowerThree => "flower-3",
+            Objects::FlowerFour => "flower-4",
+            Objects::TreeOne => "tree-1",
+            Objects::TreeTwo => "tree-2",
+            Objects::GrassOne => "grass-1",
+            Objects::GrassTwo => "grass-2",
+            Objects::GrassThree => "grass-3",
+            Objects::GrassFour => "grass-4",
+            Objects::GrassFive => "grass-5",
+            Objects::GrassSix => "grass-6",
+            Objects::Dirt => "dirt",
+        };
 
-    pub fn to_path(&self) -> String {
+        write!(f, "{}", name)
+    }
+}
+
+impl Objects {
+    pub fn to_path(self) -> String {
         match self {
             Objects::FlowerOne => "flowers/1-1.png".to_string(),
             Objects::FlowerTwo => "flowers/1-2.png".to_string(),
@@ -52,7 +56,7 @@ impl Objects {
         }
     }
 
-    pub fn to_size(&self) -> (u32, u32) {
+    pub fn to_size(self) -> (u32, u32) {
         match self {
             Objects::TreeOne | Objects::TreeTwo => (35, 60),
             _ => (16, 16),
@@ -91,7 +95,6 @@ impl Objects {
     }
 
     pub fn get_mask_id(&self) -> Option<String> {
-        self.get_mask_path()
-            .map(|_| format!("mask-{}", self.to_string()))
+        self.get_mask_path().map(|_| format!("mask-{}", self))
     }
 }

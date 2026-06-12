@@ -50,9 +50,7 @@ impl Renderable for Trees {
 
             trees.push_str(&format!(
                 r##"<use x="{}" y="{}" xlink:href="#{}" />"##,
-                x,
-                y,
-                tree.to_string()
+                x, y, tree
             ));
         }
 
