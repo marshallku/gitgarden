@@ -8,7 +8,7 @@ pub fn encode_from_path(path: &str) -> String {
     let file = std::fs::read(file_path.clone());
 
     if let Err(e) = file {
-        eprintln!(
+        tracing::error!(
             "Error reading file: {}, {:?}",
             file_path.to_str().unwrap_or(path),
             e

@@ -50,3 +50,20 @@ pub async fn github_graphql_request(
 
     Ok(json_response)
 }
+
+/// GitHub usernames are 1-39 characters of alphanumerics or hyphens and
+/// cannot start or end with a hyphen. Anything else never resolves upstream,
+/// so reject it before building request URLs from it.
+pub fn is_valid_github_username(user_name: &str) -> bool {
+    if user_name.is_empty() || user_name.len() > 39 {
+        return false;
+    }
+
+    if user_name.starts_with('-') || user_name.ends_with('-') {
+        return false;
+    }
+
+    user_name
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || c == '-')
+}

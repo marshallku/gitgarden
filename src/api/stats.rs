@@ -61,7 +61,7 @@ pub async fn get_stats(
     let response = match github_graphql_request(client, query, &headers, data, token).await {
         Ok(response) => response,
         Err(error) => {
-            println!("Error: {:?}", error);
+            tracing::error!("GitHub GraphQL request failed: {:?}", error);
             return Err(vec![GithubGraphQLError {
                 error_type: ERROR_TYPE_REQUEST.to_string(),
                 locations: vec![],
@@ -71,7 +71,17 @@ pub async fn get_stats(
         }
     };
 
-    let response: GithubGraphQLResponse<Data> = serde_json::from_value(response).unwrap();
+    let response: GithubGraphQLResponse<Data> = match serde_json::from_value(response) {
+        Ok(parsed) => parsed,
+        Err(error) => {
+            return Err(vec![GithubGraphQLError {
+                error_type: ERROR_TYPE_RESPONSE.to_string(),
+                locations: vec![],
+                message: error.to_string(),
+                path: vec![],
+            }])
+        }
+    };
 
     match response {
         GithubGraphQLResponse {

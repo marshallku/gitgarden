@@ -73,7 +73,7 @@ pub async fn get_most_used_languages(
     let response = match github_graphql_request(client, query, &headers, data, token).await {
         Ok(response) => response,
         Err(error) => {
-            println!("Error: {:?}", error);
+            tracing::error!("GitHub GraphQL request failed: {:?}", error);
             return Err(vec![GithubGraphQLError {
                 error_type: ERROR_TYPE_REQUEST.to_string(),
                 locations: vec![],

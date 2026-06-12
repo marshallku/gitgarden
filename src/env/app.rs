@@ -9,13 +9,13 @@ pub struct Env {
 
 impl Env {
     pub fn new() -> Self {
-        let port = match std::env::var("PORT") {
-            Ok(port) => port.parse().unwrap_or(18080),
-            Err(_) => 41890,
-        };
+        let port = std::env::var("PORT")
+            .ok()
+            .and_then(|port| port.parse().ok())
+            .unwrap_or(18080);
         let host = match std::env::var("HOST") {
             Ok(host) => Cow::Owned(host),
-            Err(_) => Cow::Owned("http://localhost/".to_string()),
+            Err(_) => Cow::Borrowed("127.0.0.1"),
         };
         let token = match std::env::var("GITHUB_TOKEN") {
             Ok(token) => Cow::Owned(token),

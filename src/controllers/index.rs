@@ -9,7 +9,10 @@ use serde::Deserialize;
 use crate::{
     env::state::AppState,
     services::{farm::render::render_farm, page::render::render_page},
-    utils::{extractor::ExtractFullOrigin, http::get_cache_header, string::minify_xml},
+    utils::{
+        extractor::ExtractFullOrigin, github::is_valid_github_username, http::get_cache_header,
+        string::minify_xml,
+    },
 };
 
 #[derive(Deserialize)]
@@ -33,6 +36,15 @@ pub async fn get(
     }
 
     let user_name = user_name.unwrap();
+
+    if !is_valid_github_username(&user_name) {
+        let mut headers = get_cache_header("1h");
+
+        headers.insert("Content-Type", "text/plain".parse().unwrap());
+
+        return (StatusCode::BAD_REQUEST, headers, "Invalid user name".to_string());
+    }
+
     let year = year.unwrap_or_else(|| chrono::Local::now().year());
     let rendered_svg = render_farm(&user_name, year, state).await;
 
