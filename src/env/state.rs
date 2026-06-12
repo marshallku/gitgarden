@@ -5,7 +5,10 @@ use super::app::Env;
 use crate::cache::GithubCache;
 use dotenvy::dotenv;
 
-const CACHE_TTL_SECS: u64 = 3 * 24 * 60 * 60;
+/// Age past which a cached entry is served but revalidated in the background.
+const CACHE_SOFT_TTL_SECS: u64 = 6 * 60 * 60;
+/// Age past which a cached entry is discarded and fetched in the foreground.
+const CACHE_HARD_TTL_SECS: u64 = 3 * 24 * 60 * 60;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -25,7 +28,10 @@ impl AppState {
             host: env.host.into_owned(),
             port: env.port,
             token: env.token.into_owned(),
-            cache: Arc::new(GithubCache::new(Duration::from_secs(CACHE_TTL_SECS))),
+            cache: Arc::new(GithubCache::new(
+                Duration::from_secs(CACHE_SOFT_TTL_SECS),
+                Duration::from_secs(CACHE_HARD_TTL_SECS),
+            )),
         }
     }
 }

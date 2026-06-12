@@ -5,7 +5,7 @@ use serde_json::json;
 
 use crate::utils::github::github_graphql_request;
 
-use super::structures::{GithubGraphQLError, GithubGraphQLResponse};
+use super::structures::{GithubGraphQLError, GithubGraphQLResponse, ERROR_TYPE_REQUEST, ERROR_TYPE_RESPONSE};
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct LanguageData {
@@ -74,7 +74,7 @@ pub async fn get_most_used_languages(
         Err(error) => {
             println!("Error: {:?}", error);
             return Err(vec![GithubGraphQLError {
-                error_type: "RequestError".to_string(),
+                error_type: ERROR_TYPE_REQUEST.to_string(),
                 locations: vec![],
                 message: error.to_string(),
                 path: vec![],
@@ -85,23 +85,19 @@ pub async fn get_most_used_languages(
     let parsed_response: Result<GithubGraphQLResponse<LanguageData>, _> =
         serde_json::from_value(response);
     let user_data = match parsed_response {
-        Ok(response) => match response {
-            GithubGraphQLResponse {
-                data: Some(data),
-                errors: None,
-            } => data.user.unwrap(),
-            _ => {
-                return Err(vec![GithubGraphQLError {
-                    error_type: "ResponseError".to_string(),
-                    locations: vec![],
-                    message: "Unexpected response".to_string(),
-                    path: vec![],
-                }])
-            }
-        },
+        Ok(GithubGraphQLResponse {
+            data: Some(LanguageData { user: Some(user) }),
+            errors: None,
+        }) => user,
+        // GraphQL may return both data and errors (e.g. data.user = null plus
+        // a NOT_FOUND error). Preserve genuine errors so they stay cacheable.
+        Ok(GithubGraphQLResponse {
+            errors: Some(errors),
+            ..
+        }) => return Err(errors),
         _ => {
             return Err(vec![GithubGraphQLError {
-                error_type: "ResponseError".to_string(),
+                error_type: ERROR_TYPE_RESPONSE.to_string(),
                 locations: vec![],
                 message: "Unexpected response".to_string(),
                 path: vec![],

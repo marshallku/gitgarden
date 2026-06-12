@@ -5,7 +5,7 @@ use serde_json::json;
 
 use crate::utils::github::github_graphql_request;
 
-use super::structures::{GithubGraphQLError, GithubGraphQLResponse};
+use super::structures::{GithubGraphQLError, GithubGraphQLResponse, ERROR_TYPE_REQUEST, ERROR_TYPE_RESPONSE};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Data {
@@ -62,7 +62,7 @@ pub async fn get_stats(
         Err(error) => {
             println!("Error: {:?}", error);
             return Err(vec![GithubGraphQLError {
-                error_type: "RequestError".to_string(),
+                error_type: ERROR_TYPE_REQUEST.to_string(),
                 locations: vec![],
                 message: error.to_string(),
                 path: vec![],
@@ -74,15 +74,17 @@ pub async fn get_stats(
 
     match response {
         GithubGraphQLResponse {
-            data: Some(data),
+            data: Some(Data { user: Some(user) }),
             errors: None,
-        } => Ok(data.user.unwrap()),
+        } => Ok(user),
+        // GraphQL may return both data and errors (e.g. data.user = null plus
+        // a NOT_FOUND error). Preserve genuine errors so they stay cacheable.
         GithubGraphQLResponse {
-            data: None,
             errors: Some(errors),
+            ..
         } => Err(errors),
         _ => Err(vec![GithubGraphQLError {
-            error_type: "ResponseError".to_string(),
+            error_type: ERROR_TYPE_RESPONSE.to_string(),
             locations: vec![],
             message: format!("Invalid user: {}", user_name),
             path: vec!["unknown".to_string()],

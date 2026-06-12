@@ -1,14 +1,14 @@
 use std::collections::HashMap;
 
 use tokio::{spawn, task};
-use tracing::error;
+use tracing::{error, info, warn};
 
 use crate::{
     api::{
         contributions::get_daily_commits,
         languages::{get_most_used_languages, MostUsedLanguage},
         stats::{get_stats, User},
-        structures::GithubGraphQLError,
+        structures::{GithubGraphQLError, ERROR_TYPE_REQUEST, ERROR_TYPE_RESPONSE},
     },
     cache::CachedUserData,
     env::state::AppState,
@@ -22,79 +22,90 @@ pub struct FetchedData {
     pub languages: Vec<MostUsedLanguage>,
 }
 
+struct FetchOutcome {
+    data: FetchedData,
+    /// Whether every source either succeeded or failed in a cacheable way.
+    /// Incomplete outcomes are served to the client but never cached, so a
+    /// transient upstream failure cannot poison the cache until the next TTL.
+    complete: bool,
+}
+
 pub struct UserData {
     pub data: FetchedData,
     pub is_cached: bool,
 }
 
 pub async fn get_data(user_name: &str, year: i32, state: AppState) -> Result<UserData, FarmError> {
-    if let Some(cached) = state.cache.get(user_name, year).await {
-        let user = user_name.to_string();
-        let state_clone = state.clone();
-
-        spawn(async move {
-            if let Ok(data) = fetch_data(&user, year, state_clone.clone()).await {
-                let FetchedData {
-                    commits,
-                    stats,
-                    languages,
-                } = data;
-                state_clone
-                    .cache
-                    .set(
-                        &user,
-                        year,
-                        CachedUserData {
-                            commits,
-                            languages,
-                            stats,
-                        },
-                    )
-                    .await;
-            }
-        });
+    if let Some(lookup) = state.cache.get(user_name, year).await {
+        if lookup.is_stale {
+            revalidate_in_background(user_name, year, state.clone()).await;
+        }
 
         return Ok(UserData {
             data: FetchedData {
-                commits: cached.commits,
-                stats: cached.stats,
-                languages: cached.languages,
+                commits: lookup.data.commits,
+                stats: lookup.data.stats,
+                languages: lookup.data.languages,
             },
             is_cached: true,
         });
     }
 
-    let FetchedData {
-        commits,
-        stats,
-        languages: most_used_languages,
-    } = fetch_data(user_name, year, state.clone()).await?;
+    let outcome = fetch_data(user_name, year, state.clone()).await?;
 
-    state
-        .clone()
-        .cache
-        .set(
-            user_name,
-            year,
-            CachedUserData {
-                commits: commits.clone(),
-                languages: most_used_languages.clone(),
-                stats: stats.clone(),
-            },
-        )
-        .await;
+    if outcome.complete {
+        state
+            .cache
+            .set(
+                user_name,
+                year,
+                CachedUserData {
+                    commits: outcome.data.commits.clone(),
+                    languages: outcome.data.languages.clone(),
+                    stats: outcome.data.stats.clone(),
+                },
+            )
+            .await;
+    }
 
     Ok(UserData {
-        data: FetchedData {
-            commits,
-            stats,
-            languages: most_used_languages,
-        },
+        data: outcome.data,
         is_cached: false,
     })
 }
 
-async fn fetch_data(user_name: &str, year: i32, state: AppState) -> Result<FetchedData, FarmError> {
+async fn revalidate_in_background(user_name: &str, year: i32, state: AppState) {
+    let Some(guard) = state.cache.try_begin_revalidation(user_name, year).await else {
+        return;
+    };
+    let user = user_name.to_string();
+
+    spawn(async move {
+        let _guard = guard;
+
+        info!("Revalidating cache: user = {}, year = {}", user, year);
+
+        match fetch_data(&user, year, state.clone()).await {
+            Ok(outcome) if outcome.complete => {
+                state.cache.set(&user, year, outcome.data.into()).await;
+            }
+            Ok(_) => {
+                warn!(
+                    "Skipped cache update with incomplete data: user = {}, year = {}",
+                    user, year
+                );
+            }
+            Err(err) => {
+                error!(
+                    "Failed to revalidate cache: user = {}, year = {}, error = {:?}",
+                    user, year, err
+                );
+            }
+        }
+    });
+}
+
+async fn fetch_data(user_name: &str, year: i32, state: AppState) -> Result<FetchOutcome, FarmError> {
     let commits = task::spawn({
         let user_name = user_name.to_string();
 
@@ -121,25 +132,59 @@ async fn fetch_data(user_name: &str, year: i32, state: AppState) -> Result<Fetch
         }
     });
 
-    let commits = match commits.await? {
-        Ok(commits) => commits,
+    let (commits, commits_ok) = match commits.await? {
+        Ok(commits) => (commits, true),
         Err(error) => {
             error!("Failed to get daily commits: {:?}", error);
-            HashMap::with_capacity(0)
+            (HashMap::with_capacity(0), false)
         }
     };
     let stats = stats.await?;
-    let most_used_languages = match most_used_languages.await? {
-        Ok(languages) => languages,
+    let (most_used_languages, languages_ok) = match most_used_languages.await? {
+        Ok(languages) => (languages, true),
         Err(err) => {
             error!("Failed to get most used languages: {:?}", err);
-            vec![]
+            // A durable GraphQL error (e.g. NOT_FOUND) means the empty list IS
+            // the correct result for this user, so it stays cacheable.
+            let cacheable = is_cacheable_errors(&err);
+            (vec![], cacheable)
         }
     };
 
-    Ok(FetchedData {
-        commits,
-        stats,
-        languages: most_used_languages,
+    let complete = commits_ok && languages_ok && is_cacheable_stats(&stats);
+
+    Ok(FetchOutcome {
+        data: FetchedData {
+            commits,
+            stats,
+            languages: most_used_languages,
+        },
+        complete,
     })
+}
+
+/// `Ok` results and genuine GraphQL errors (e.g. NOT_FOUND for a nonexistent
+/// user) are durable and worth caching. `RequestError`/`ResponseError` are
+/// synthesized locally for transport or parse failures and must not be.
+fn is_cacheable_stats(stats: &Result<User, Vec<GithubGraphQLError>>) -> bool {
+    match stats {
+        Ok(_) => true,
+        Err(errors) => is_cacheable_errors(errors),
+    }
+}
+
+fn is_cacheable_errors(errors: &[GithubGraphQLError]) -> bool {
+    errors
+        .iter()
+        .all(|e| e.error_type != ERROR_TYPE_REQUEST && e.error_type != ERROR_TYPE_RESPONSE)
+}
+
+impl From<FetchedData> for CachedUserData {
+    fn from(data: FetchedData) -> Self {
+        Self {
+            commits: data.commits,
+            languages: data.languages,
+            stats: data.stats,
+        }
+    }
 }

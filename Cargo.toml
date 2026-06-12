@@ -15,7 +15,7 @@ rustint = "0.1.5"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 tl = "0.7.8"
-tokio = { version = "1.44.2", features = ["rt-multi-thread", "macros", "signal"] }
+tokio = { version = "1.44.2", features = ["rt-multi-thread", "macros", "signal", "time"] }
 tower = { version = "0.5.3", features = ["util"] }
 tower-http = { version = "0.6.11", features = ["trace"] }
 tracing = "0.1.41"

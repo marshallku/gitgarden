@@ -15,6 +15,8 @@ mod render;
 mod services;
 mod utils;
 
+const CACHE_EVICTION_INTERVAL_SECS: u64 = 60 * 60;
+
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt()
@@ -24,6 +26,8 @@ async fn main() {
 
     let state = AppState::from_env();
     let address = format!("{}:{}", state.host, state.port);
+
+    spawn_cache_eviction(state.cache.clone());
     let app = app()
         .layer(
             TraceLayer::new_for_http()
@@ -40,6 +44,19 @@ async fn main() {
         .with_graceful_shutdown(handle_shutdown())
         .await
         .unwrap();
+}
+
+fn spawn_cache_eviction(cache: std::sync::Arc<cache::GithubCache>) {
+    tokio::spawn(async move {
+        let mut interval = tokio::time::interval(std::time::Duration::from_secs(
+            CACHE_EVICTION_INTERVAL_SECS,
+        ));
+
+        loop {
+            interval.tick().await;
+            cache.evict_expired().await;
+        }
+    });
 }
 
 async fn handle_shutdown() {
