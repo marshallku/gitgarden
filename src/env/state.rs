@@ -16,6 +16,8 @@ pub struct AppState {
     pub port: u16,
     pub token: String,
     pub cache: Arc<GithubCache>,
+    /// Shared HTTP client so all GitHub calls reuse one connection pool.
+    pub http: reqwest::Client,
 }
 
 impl AppState {
@@ -32,6 +34,7 @@ impl AppState {
                 Duration::from_secs(CACHE_SOFT_TTL_SECS),
                 Duration::from_secs(CACHE_HARD_TTL_SECS),
             )),
+            http: reqwest::Client::new(),
         }
     }
 }

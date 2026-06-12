@@ -40,6 +40,7 @@ pub struct ContributionsCollection {
 }
 
 pub async fn get_stats(
+    client: &reqwest::Client,
     user_name: &str,
     from: String,
     to: String,
@@ -57,7 +58,7 @@ pub async fn get_stats(
         }
     });
 
-    let response = match github_graphql_request(query, &headers, data, token).await {
+    let response = match github_graphql_request(client, query, &headers, data, token).await {
         Ok(response) => response,
         Err(error) => {
             println!("Error: {:?}", error);

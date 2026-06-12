@@ -107,22 +107,26 @@ async fn revalidate_in_background(user_name: &str, year: i32, state: AppState) {
 
 async fn fetch_data(user_name: &str, year: i32, state: AppState) -> Result<FetchOutcome, FarmError> {
     let commits = task::spawn({
+        let client = state.http.clone();
         let user_name = user_name.to_string();
 
-        async move { get_daily_commits(&user_name, year).await }
+        async move { get_daily_commits(&client, &user_name, year).await }
     });
     let most_used_languages = task::spawn({
+        let client = state.http.clone();
         let user_name = user_name.to_string();
         let token = state.token.clone();
 
-        async move { get_most_used_languages(&user_name, year, &token).await }
+        async move { get_most_used_languages(&client, &user_name, year, &token).await }
     });
     let stats = task::spawn({
+        let client = state.http.clone();
         let user_name = user_name.to_string();
         let token = state.token.clone();
 
         async move {
             get_stats(
+                &client,
                 &user_name,
                 format!("{}-01-01T00:00:00Z", year),
                 format!("{}-12-31T23:59:59Z", year),

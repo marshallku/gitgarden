@@ -37,7 +37,11 @@ fn parse_commit_from_string(
     Ok(commits_by_day)
 }
 
-pub async fn get_daily_commits(user_name: &str, year: i32) -> Result<HashMap<String, u32>, String> {
+pub async fn get_daily_commits(
+    client: &reqwest::Client,
+    user_name: &str,
+    year: i32,
+) -> Result<HashMap<String, u32>, String> {
     let from = format!("{}-01-01", year);
     let to = format!("{}-12-31", year);
     let query = format!("?from={}&to={}", from, to);
@@ -46,7 +50,9 @@ pub async fn get_daily_commits(user_name: &str, year: i32) -> Result<HashMap<Str
         user_name, query
     );
 
-    let response = reqwest::get(&url)
+    let response = client
+        .get(&url)
+        .send()
         .await
         .map_err(|e| e.to_string())?
         .text()

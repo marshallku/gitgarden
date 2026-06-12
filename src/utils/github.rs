@@ -7,13 +7,12 @@ use serde_json::{json, Value};
 use std::collections::HashMap;
 
 pub async fn github_graphql_request(
+    client: &Client,
     query: &str,
     headers: &HashMap<&str, &str>,
     data: Value,
     token: &str,
 ) -> Result<Value, Error> {
-    let client = Client::new();
-
     let mut request_headers = HeaderMap::new();
     request_headers.insert(
         AUTHORIZATION,

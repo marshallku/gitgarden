@@ -55,6 +55,7 @@ pub struct MostUsedLanguage {
 }
 
 pub async fn get_most_used_languages(
+    client: &reqwest::Client,
     user_name: &str,
     year: i32,
     token: &str,
@@ -69,7 +70,7 @@ pub async fn get_most_used_languages(
         }
     });
 
-    let response = match github_graphql_request(query, &headers, data, token).await {
+    let response = match github_graphql_request(client, query, &headers, data, token).await {
         Ok(response) => response,
         Err(error) => {
             println!("Error: {:?}", error);
